@@ -1,0 +1,28 @@
+/* Eye slice layer. All frames share the 1068x1213 canvas. */
+
+.eyes {
+  position: absolute;
+  inset: 0;
+  aspect-ratio: 1068 / 1213;
+  /* Keep eyes below the face layer so they only show through transparent eye cutouts. */
+  z-index: 1;
+  pointer-events: none;
+}
+
+.frame {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+}
+
+.frame[data-active='true'] {
+  opacity: 1;
+}
+
+.slice {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}

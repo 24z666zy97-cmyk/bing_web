@@ -1,0 +1,85 @@
+# 依赖与构建产物
+node_modules/
+.next/
+.next-build/
+out/
+build/
+dist/
+
+# 环境变量与密钥
+.env
+.env*.local
+
+# Vercel
+.vercel/
+
+# 编辑器与系统文件
+.DS_Store
+Thumbs.db
+*.swp
+
+# TypeScript 增量编译缓存
+*.tsbuildinfo
+next-env.d.ts
+
+# 素材原件区：体积大且不需要进仓库。
+# 原文件继续留在本地，网站只请求 public/ 下的衍生资产。
+prepare/fonts/downloads/
+
+# prepare/public/Portfolio/ 是 SYSTEM 项目的素材原件区（含超大原始图），整体不进仓库；
+# 网站只使用 public/portfolio/ 下的衍生资产。
+prepare/public/Portfolio/
+
+# prepare/ 里嵌了一个独立的 git 仓库（SYSTEM 项目资料）。
+# 排除以免把它的历史和作者信息带进本仓库（agent.md 红线 1）。
+prepare/public/Portfolio/**/.git/
+
+# 建模与工程源文件一律不进仓库（agent.md 红线 2）
+*.obj
+*.mtl
+*.fbx
+*.stl
+*.ply
+*.blend
+*.3dm
+
+# Local stale Next.js cache backups
+.next-stale-*/
+.next-corrupt-*/
+
+# Local assistant/tool state
+.claude/
+
+# Nested standalone project repos
+prepare/public/Portfolio/system/72926/
+# Local development logs and visual QA output
+.codex-*.log
+.codex-*.out
+.codex-*.err
+audit-dev*.log
+audit-dev*.out
+output/
+
+# Local deployment archives, development logs, and visual QA captures
+*.zip
+*.log
+.codex-audit/
+.signals-current.jpg
+.stages-check.jpg
+design-qa-*.png
+
+# Local one-off visualization prototypes
+hub-sales-hc-dashboard.html
+integrated-supply-vacancy-almanac.html
+office-area-efficiency-mismatch-bars.html
+office-area-efficiency-scatter.html
+
+# Original sticker source; the optimized public derivative is tracked instead.
+prepare/public/profile/Sticker/thinkingface.png
+
+# Independent reference repositories kept inside the asset workspace
+prepare/public/Portfolio/system/google-labs/
+prepare/public/Portfolio/system/墨斗云产品框架/
+
+# prepare/ 里的独立工具项目（卡片生成器），含 .openai/.npmrc 等配置，不进仓库。
+prepare/卡片/

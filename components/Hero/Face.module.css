@@ -1,0 +1,100 @@
+﻿.portrait,
+.flap {
+  position: absolute;
+  inset: 0;
+  aspect-ratio: 1068 / 1213;
+  pointer-events: none;
+}
+
+.portrait {
+  z-index: 2;
+}
+
+.portrait[data-hidden='true'] {
+  opacity: 0;
+}
+
+.flap {
+  z-index: 3;
+  overflow: visible;
+}
+
+.flapFallback,
+.webglFlapHost {
+  position: absolute;
+  display: block;
+  pointer-events: none;
+}
+
+.flapFallback {
+  inset: 0;
+  z-index: 1;
+}
+
+.flapFallback img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.webglFlapHost {
+  left: min(0px, calc((100% - 100vw) / 2));
+  top: min(0px, calc((100% - 100svh) / 2));
+  width: max(100%, 100vw);
+  height: max(100%, 100svh);
+  z-index: 2;
+  opacity: 0;
+}
+
+.flap[data-render-mode='webgl'] .webglFlapHost {
+  opacity: 1;
+}
+
+.flap[data-render-mode='webgl'] .flapFallback {
+  display: none;
+}
+
+.flap[data-render-mode='fallback'] .flapFallback {
+  transform: translate3d(calc(var(--open) * 42%), calc(var(--open) * 24%), 0)
+    rotate(calc(var(--open) * 18deg));
+  opacity: calc(1 - var(--open));
+  transform-origin: 8% 52%;
+}
+
+.webglFlapHost canvas {
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
+  pointer-events: none !important;
+}
+
+.masked {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.edge {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  /* Cover the portrait cut edge, but stay underneath the lifted flap. */
+  z-index: 2;
+  pointer-events: none;
+  opacity: var(--open);
+  clip-path: inset(0 var(--edge-right) 0 0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .flapFallback,
+  .webglFlapHost {
+    display: none;
+  }
+}
+

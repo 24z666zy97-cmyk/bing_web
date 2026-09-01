@@ -1,0 +1,520 @@
+/* Content 导览的外层容器（content.md §2–§4、§10）。
+ *
+ * 一套三用，差异全部集中在这里：
+ *   inline   首页最后一屏，跟随文档流
+ *   overlay  菜单切出的全屏覆盖层，固定定位 + 从上方切出
+ *   footer   子页页尾，去掉肖像与气泡，只留列表
+ */
+
+.section {
+  position: relative;
+
+  display: grid;
+  /* 左四右六（content.md §2） */
+  grid-template-columns: 4fr 6fr;
+  align-items: center;
+
+  background: var(--color-bg);
+}
+
+/* ============ inline：首页最后一屏 ============ */
+.inline {
+  min-height: 100svh;
+  margin-block-start: var(--home-section-gap);
+  /* 人物入场和旋转允许向上越出本节，不在组件边界切头；
+   * 页面级 overflow-x: clip 仍负责阻止横向滚动条。 */
+  overflow: visible;
+  padding-inline: var(--page-gutter);
+
+  /* 底部给版权带让位 */
+  padding-block-end: 5rem;
+}
+
+/* ============ overlay：菜单切出的全屏覆盖层 ============ */
+.overlay {
+  position: fixed;
+  inset: 0;
+  overflow: clip;
+
+  padding-inline: var(--page-gutter);
+  padding-block-end: 5rem;
+
+  /* 比 --z-nav 低 1，让导航三件套留在覆盖层上方：
+   * content.md §8 要求覆盖层打开时菜单按钮变叉号、Contact 胶囊不变，
+   * 两者都必须可见可点。Contact 面板仍用完整的 --z-overlay 盖住这里。 */
+  z-index: calc(var(--z-nav) - 1);
+
+  /* 从下拉菜单向下切出（content.md §1） */
+  transform: translateY(-100%);
+  visibility: hidden;
+
+  transition:
+    transform 650ms var(--ease-primary),
+    visibility 0s linear 650ms;
+}
+
+.overlay[data-open='true'] {
+  transform: translateY(0);
+  visibility: visible;
+  transition:
+    transform var(--duration-slow) var(--ease-primary),
+    visibility 0s;
+}
+
+/* ============ footer：子页页尾 ============ */
+.footer {
+  /* 页尾只留列表，肖像与气泡不重复出现 */
+  grid-template-columns: 1fr;
+  padding-inline: var(--page-gutter);
+  padding-block: var(--section-padding) 5rem;
+  border-top: 1px solid var(--color-line);
+}
+
+/* ============ 左侧肖像区（content.md §3） ============ */
+.portraitArea {
+  position: relative;
+  align-self: end;
+  min-width: 0;
+
+  /* 肖像从左下角进入，允许被视口左边与底边裁切 */
+  height: 100%;
+  min-height: 0;
+}
+
+.portrait {
+  --portrait-x: clamp(-14rem, -11.75vw, -8rem);
+  --portrait-y: clamp(-6.25rem, -5.25vw, -3.5rem);
+
+  position: absolute;
+  /* 负值实现左边缘裁切 */
+  left: calc(-12% - 30px);
+  bottom: calc(-9% + 30px);
+
+  /* 头部尺寸明显超出左侧区域 */
+  width: min(52vw, 655px);
+  max-width: none;
+  height: auto;
+
+  /* 头部略带倾斜 */
+  transform: translate3d(var(--portrait-x), var(--portrait-y), 0) rotate(30deg) scale(1.1);
+  transform-origin: bottom left;
+  filter: drop-shadow(0 18px 18px rgb(0 0 0 / 16%));
+
+  pointer-events: none;
+  will-change: transform, filter;
+}
+
+.inline .portrait {
+  animation: portrait-enter 920ms cubic-bezier(0.2, 0.82, 0.24, 1) 80ms both;
+  animation-play-state: paused;
+}
+
+.inline[data-portrait-entered='true'] .portrait {
+  animation-play-state: running;
+}
+
+.overlay .portrait {
+  animation: none;
+}
+
+.overlay[data-open='true'] .portrait {
+  animation: portrait-enter 920ms cubic-bezier(0.2, 0.82, 0.24, 1) 80ms both;
+}
+
+.overlay[data-open='false'] .portrait {
+  animation: portrait-exit 600ms cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+@keyframes portrait-enter {
+  0% {
+    /* 低角度时头像的纵向包围盒最高；从章节内部较低位置起步，
+     * 随旋转同步上移，避免头顶越过裁切边界。 */
+    transform: translate3d(var(--portrait-x), calc(var(--portrait-y) + 11rem), 0) rotate(4deg)
+      scale(1.1);
+    filter: drop-shadow(0 12px 12px rgb(0 0 0 / 11%));
+  }
+
+  70% {
+    transform: translate3d(var(--portrait-x), var(--portrait-y), 0) rotate(35deg) scale(1.1);
+    filter: drop-shadow(0 20px 20px rgb(0 0 0 / 18%));
+  }
+
+  86% {
+    transform: translate3d(var(--portrait-x), var(--portrait-y), 0) rotate(28.7deg) scale(1.1);
+  }
+
+  to {
+    transform: translate3d(var(--portrait-x), var(--portrait-y), 0) rotate(30deg) scale(1.1);
+    filter: drop-shadow(0 18px 18px rgb(0 0 0 / 16%));
+  }
+}
+
+@keyframes portrait-exit {
+  0% {
+    transform: translate3d(var(--portrait-x), var(--portrait-y), 0) rotate(30deg) scale(1.1);
+    filter: drop-shadow(0 18px 18px rgb(0 0 0 / 16%));
+  }
+
+  72% {
+    transform: translate3d(var(--portrait-x), var(--portrait-y), 0) rotate(1.5deg) scale(1.1);
+    filter: drop-shadow(0 12px 12px rgb(0 0 0 / 11%));
+  }
+
+  88% {
+    transform: translate3d(var(--portrait-x), var(--portrait-y), 0) rotate(5deg) scale(1.1);
+  }
+
+  100% {
+    transform: translate3d(var(--portrait-x), var(--portrait-y), 0) rotate(4deg) scale(1.1);
+    filter: drop-shadow(0 12px 12px rgb(0 0 0 / 11%));
+  }
+}
+
+/* ============ 左侧提示气泡（content.md §4） ============ */
+.bubble {
+  position: absolute;
+  top: 8%;
+  right: -4%;
+  z-index: 1;
+
+  width: min(18rem, 38vw);
+  aspect-ratio: 330 / 180;
+
+  /* 手工撕下的纸片轮廓：不规则多边形，底部留一个短尖角 */
+  transform: rotate(0deg);
+  pointer-events: none;
+}
+
+.bubble {
+  top: calc(6% + 60px);
+  right: 3%;
+  width: min(10rem, 23vw);
+  aspect-ratio: 783 / 331;
+  transform: translate3d(0, 0, 0) scale(1);
+  transform-origin: 45% 60%;
+  opacity: 0;
+  will-change: transform, opacity;
+}
+
+.inline .bubble {
+  animation:
+    bubble-enter 520ms cubic-bezier(0.22, 1, 0.36, 1) 880ms both,
+    bubble-breathe 3.2s ease-in-out 1.4s infinite;
+  animation-play-state: paused;
+}
+
+.inline[data-portrait-entered='true'] .bubble {
+  animation-play-state: running;
+}
+
+.overlay[data-open='true'] .bubble {
+  animation:
+    bubble-enter 520ms cubic-bezier(0.22, 1, 0.36, 1) 880ms both,
+    bubble-breathe 3.2s ease-in-out 1.4s infinite;
+}
+
+@keyframes bubble-enter {
+  from {
+    opacity: 0;
+    transform: translate3d(-1.2rem, 0.75rem, 0) rotate(-5deg) scale(0.82);
+  }
+
+  72% {
+    opacity: 1;
+    transform: translate3d(0.15rem, -0.12rem, 0) rotate(1.2deg) scale(1.035);
+  }
+
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) rotate(0) scale(1);
+  }
+}
+
+@keyframes bubble-breathe {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+
+  50% {
+    transform: translate3d(0, -5px, 0) scale(1.025);
+  }
+}
+
+.bubble picture,
+.bubbleShape {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.bubbleText {
+  position: absolute;
+  inset: 8% 8% 30%;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  color: var(--color-pink);
+  font-size: 1.05rem;
+  line-height: var(--leading-l3);
+  letter-spacing: var(--tracking-l3);
+  text-align: center;
+  white-space: nowrap;
+  font-weight: 700;
+}
+
+/* ============ 右侧列表区 ============ */
+.listArea {
+  /* 信息量集中在右侧，列表占据右侧主体高度 */
+  align-self: center;
+  justify-self: center;
+  width: 88%;
+  min-width: 0;
+  container-type: inline-size;
+  transform: translateY(50px);
+}
+
+/* ============ 底部信息带（content.md §10） ============ */
+.colophon {
+  position: absolute;
+  bottom: 1.5rem;
+  /* 偏右放置，避开左侧大型肖像 */
+  right: var(--page-gutter);
+  left: 42%;
+
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+
+  font-family: var(--font-latin);
+  font-size: var(--font-small);
+  line-height: 1.5;
+  letter-spacing: 0.08em;
+  color: var(--color-text-muted);
+  text-align: right;
+
+  /* 低权重纯文字，禁止任何点击行为 */
+  pointer-events: none;
+  user-select: none;
+}
+
+/* 页尾形态没有肖像，版权带回到常规流并居中 */
+.footer .colophon {
+  position: static;
+  left: auto;
+  right: auto;
+  margin-block-start: var(--section-padding);
+  text-align: center;
+  align-items: center;
+}
+
+/* ============ 响应式（content.md §11） ============ */
+@media (width > 40rem) {
+  .inline .portrait,
+  .overlay .portrait {
+    --portrait-x: clamp(-10rem, -8.5vw, -6rem);
+    --portrait-y: clamp(-3.5rem, -3vw, -2rem);
+
+    left: calc(-8% - 50px);
+    bottom: calc(-5% + 74px);
+    width: min(46vw, 580px);
+  }
+}
+
+@media (width <= 60rem) {
+  .section {
+    /* 中屏收窄左侧肖像占比 */
+    grid-template-columns: 3fr 7fr;
+  }
+
+  .inline .portrait,
+  .overlay .portrait {
+    left: calc(-5% - 30px);
+    width: min(38vw, 29rem);
+  }
+
+  .bubble {
+    right: 0;
+    width: min(8rem, 18vw);
+  }
+
+  .portrait {
+    --portrait-x: clamp(-10rem, -10vw, -6rem);
+    --portrait-y: clamp(-5rem, -5vw, -3rem);
+  }
+
+}
+
+/* 中窄屏继续保留完整信息，但改为上下布局，避免头像、气泡侵入标题栏。 */
+@media (width <= 56rem) and (width > 40rem) {
+  .inline {
+    grid-template-columns: 1fr;
+    align-content: start;
+    min-height: auto;
+    padding-block-end: 5rem;
+  }
+
+  .inline .portraitArea {
+    display: block;
+    width: min(100%, 42rem);
+    /* 高度按头像真实宽高比预留，避免底部对齐时头顶越出 section 裁切边界。 */
+    height: clamp(24rem, 58vw, 31rem);
+    margin-inline: auto;
+    margin-block-end: var(--home-group-gap);
+    overflow: visible;
+  }
+
+  .inline .portrait {
+    --portrait-x: 0;
+    --portrait-y: 0;
+
+    left: 50%;
+    bottom: 0;
+    width: min(44vw, 24rem);
+    transform: translate3d(-50%, 0, 0) rotate(0deg) scale(1);
+    transform-origin: center bottom;
+    animation: tablet-portrait-enter 700ms var(--ease-primary) both;
+    animation-play-state: paused;
+  }
+
+  .inline[data-portrait-entered='true'] .portrait {
+    animation-play-state: running;
+  }
+
+  .inline .bubble {
+    top: 10%;
+    right: 8%;
+    width: clamp(9.5rem, 21vw, 12rem);
+  }
+
+  .inline .bubbleText {
+    inset: 8% 7% 29%;
+    font-size: clamp(0.72rem, 1.6vw, 0.95rem);
+    line-height: 1.1;
+    letter-spacing: 0;
+  }
+
+  .inline .listArea {
+    width: min(100%, 52rem);
+    transform: none;
+  }
+
+  @keyframes tablet-portrait-enter {
+    from {
+      opacity: 0;
+      transform: translate3d(-50%, 1.5rem, 0) rotate(0deg) scale(0.95);
+    }
+
+    to {
+      opacity: 1;
+      transform: translate3d(-50%, 0, 0) rotate(0deg) scale(1);
+    }
+  }
+}
+
+/* 手机：肖像与气泡让位，列表占满宽度 */
+@media (width <= 40rem) {
+  .section {
+    grid-template-columns: 1fr;
+    align-content: start;
+  }
+
+  .inline {
+    min-height: auto;
+    padding-block: 0 5rem;
+  }
+
+  .overlay {
+    padding-block: 6rem 6rem;
+  }
+
+  .portraitArea {
+    display: none;
+  }
+
+  .inline .portraitArea {
+    display: block;
+    width: 100%;
+    height: clamp(21rem, 92vw, 24rem);
+    margin-block-end: clamp(2.5rem, 9vw, 3.5rem);
+    overflow: visible;
+  }
+
+  .inline .portrait {
+    --portrait-x: 0;
+    --portrait-y: 0;
+
+    left: 50%;
+    bottom: 0;
+    width: min(68vw, 19rem);
+    transform: translate3d(-50%, 0, 0) rotate(0deg) scale(1);
+    transform-origin: center bottom;
+    animation: mobile-portrait-enter 700ms var(--ease-primary) both;
+    animation-play-state: paused;
+  }
+
+  .inline[data-portrait-entered='true'] .portrait {
+    animation-play-state: running;
+  }
+
+  .inline .bubble {
+    top: 10%;
+    right: 3%;
+    width: clamp(8.5rem, 34vw, 10.5rem);
+  }
+
+  .inline .bubbleText {
+    inset: 8% 7% 29%;
+    font-size: clamp(0.62rem, 2.7vw, 0.78rem);
+    line-height: 1.1;
+    letter-spacing: 0;
+  }
+
+  .listArea {
+    width: 100%;
+    transform: none;
+  }
+
+  .colophon {
+    position: static;
+    left: auto;
+    right: auto;
+    margin-block-start: 3rem;
+    text-align: center;
+    align-items: center;
+  }
+
+  @keyframes mobile-portrait-enter {
+    from {
+      opacity: 0;
+      transform: translate3d(-50%, 1rem, 0) rotate(0deg) scale(0.94);
+    }
+
+    to {
+      opacity: 1;
+      transform: translate3d(-50%, 0, 0) rotate(0deg) scale(1);
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .overlay {
+    transition-duration: 1ms;
+  }
+
+  .bubble {
+    animation: none;
+    opacity: 1;
+  }
+
+  .inline .portrait {
+    animation: none;
+  }
+
+  .overlay[data-open='true'] .portrait {
+    animation: none;
+  }
+
+}

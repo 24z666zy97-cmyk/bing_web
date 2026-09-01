@@ -1,0 +1,200 @@
+/* Hero 瀹瑰櫒涓庢暣寮犲嵎璧烽檷绾у眰銆? *
+ * --open  灞€閮ㄦ挄寮€ 0..1
+ * --peel  鏁村紶鍗疯捣 0..1
+ */
+
+.hero {
+  position: relative;
+  /* sticky 鑸炲彴 + sentinel 涓€璧峰喅瀹氭粴鍔ㄨ绋?*/
+}
+
+.sticky {
+  position: sticky;
+  top: 0;
+  height: 100svh;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  overflow: visible;
+}
+
+/* 鍥涘眰鍏辩敤鐨勫潗鏍囩郴瀹瑰櫒 */
+.stage {
+  position: relative;
+  z-index: 1;
+  width: min(110vw, 775px);
+  aspect-ratio: 1068 / 1213;
+  flex: 0 0 auto;
+  margin-top: clamp(1.5rem, 4svh, 3rem);
+
+  /* 鏁村紶鍗疯捣闄嶇骇鐗堬細娌垮彸涓婅鍗风銆?   * transform-origin 鏀惧湪鍙充笂锛屽嵎璧锋柟鍚戝拰灞€閮ㄧ炕鐗囦竴鑷淬€?*/
+  transform: translate3d(0, calc(var(--peel) * -32svh), 0);
+  opacity: 1;
+  transition: opacity 180ms ease-out;
+  will-change: transform, opacity;
+}
+
+/* 鍚搁《琛岀▼銆傝繖涓珮搴﹀氨鏄嵎璧疯繘搴?0鈫? 鐨勬粴鍔ㄨ窛绂伙紝
+ * useHeroStage 鐩存帴閲?.hero 鐨勫嚑浣曪紝涓嶅繀鍐嶅榻愬父閲忋€?*/
+.sentinel {
+  /* 低矮视口中舞台高度会超过一屏；把这段真实溢出计入卷起行程，
+   * 保证 Hero 完整离场后 About 才进入，不依赖裁切或后景遮挡。 */
+  height: calc(110svh + max(0px, 58rem - 100svh));
+  pointer-events: none;
+}
+
+/* gone 涔嬪悗涓嶅啀鎷︽埅鎸囬拡锛岃涓嬫柟 About 姝ｅ父浜や簰 */
+.hero[data-stage='gone'] .sticky {
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stage {
+    transform: none;
+    opacity: 1;
+  }
+
+  /* 涓嶇敤婊氬姩椹卞姩鐨勫嵎璧凤紝琛岀▼涔熷氨涓嶉渶瑕佷簡 */
+  .sentinel {
+    height: 0;
+  }
+
+  .mobileScrollCueLabel,
+  .mobileScrollCueIcon { animation: none; }
+}
+
+.stage[data-prepared='false'] {
+  opacity: 0;
+}
+
+.mobileScrollCue { display: none; }
+
+/* Top of the visible torn-paper pixels in the shared 1068 x 1213 artwork. */
+.tearEdgeMarker {
+  position: absolute;
+  top: 32.8%;
+  left: 0;
+  width: 1px;
+  height: 1px;
+  pointer-events: none;
+}
+
+.name {
+  position: absolute;
+  top: 5svh;
+  left: 50%;
+  z-index: 0;
+  width: max-content;
+  color: var(--color-pink);
+  font-family: var(--font-anybody), sans-serif;
+  font-size: 13rem;
+  font-weight: 800;
+  font-variation-settings: 'wght' 800, 'wdth' 90;
+  line-height: 0.82;
+  letter-spacing: 0;
+  white-space: nowrap;
+  display: inline-flex;
+  transform: translate3d(-50%, 0, 0);
+  pointer-events: none;
+  will-change: transform, opacity;
+}
+
+.nameChar {
+  display: inline-block;
+  opacity: calc(var(--char-progress) * (1 - var(--char-exit-progress)));
+  transform: translate3d(
+    0,
+    calc(
+      (1 - var(--char-progress)) * 40px +
+        var(--char-exit-progress) * -1.15em
+    ),
+    0
+  );
+  will-change: transform, opacity;
+}
+
+.name[data-prepared='false'] {
+  visibility: hidden;
+}
+
+@media (max-width: 1200px) {
+  .name {
+    font-size: min(10rem, 13vw);
+  }
+
+  /* 保留桌面构图的中心锚点与纵向位置，只让完整头部舞台随可用宽度缩放。 */
+  .stage {
+    width: clamp(24rem, 62vw, 46.5rem);
+  }
+}
+
+@media (max-width: 768px) {
+  /* 手机端保留完整卷起映射，但缩短无内容的滚动行程。 */
+  .sentinel {
+    height: calc(72svh + max(0px, 42rem - 100svh));
+  }
+
+  .sticky {
+    align-items: flex-start;
+    overflow: hidden;
+  }
+
+  .stage {
+    width: clamp(16rem, 72vw, 30rem);
+    margin-top: clamp(10.5rem, 24svh, 12rem);
+  }
+
+  .name {
+    top: clamp(1.5rem, 4svh, 2.25rem);
+    width: calc(100vw - 1.5rem);
+    justify-content: center;
+    font-size: min(4.75rem, 12vw);
+    line-height: 0.9;
+  }
+
+  .mobileScrollCue {
+    position: absolute;
+    z-index: 0;
+    bottom: clamp(1.5rem, 4svh, 3rem);
+    left: 50%;
+    display: grid;
+    justify-items: center;
+    gap: .7rem;
+    min-height: var(--touch-target);
+    color: var(--color-text-muted);
+    font-family: var(--font-latin), var(--font-cn);
+    font-size: clamp(.82rem, 3.5vw, .95rem);
+    font-weight: var(--weight-body);
+    white-space: nowrap;
+    transform: translateX(-50%);
+  }
+
+  .mobileScrollCueLabel,
+  .mobileScrollCueIcon { animation: hero-scroll-bob 1.8s ease-in-out infinite; }
+
+  .mobileScrollCueIcon {
+    display: grid;
+    place-items: center;
+    width: 2.2rem;
+    aspect-ratio: 1;
+    border: 1px solid var(--color-line);
+    border-radius: 50%;
+    color: var(--color-text);
+  }
+
+  .mobileScrollCueIcon svg { width: 1.1rem; height: 1.1rem; }
+}
+
+@keyframes hero-scroll-bob {
+  50% { transform: translateY(.35rem); border-color: var(--color-pink); }
+}
+
+@media (max-width: 420px) {
+  .name {
+    font-size: min(3.25rem, 12vw);
+  }
+
+  .stage {
+    margin-top: clamp(10.25rem, 23svh, 11.5rem);
+  }
+}

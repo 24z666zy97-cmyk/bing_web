@@ -1,0 +1,238 @@
+/* Brain-world layer. Cropped assets map to the shared 1068x1213 stage.
+ * --open: reveal progress; --i: animation phase; --depth: parallax intensity.
+ */
+
+.world {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  isolation: isolate;
+  aspect-ratio: 1068 / 1213;
+  container-type: size;
+  pointer-events: none;
+}
+
+.itemFrame {
+  position: absolute;
+  left: var(--left);
+  top: var(--top);
+  width: var(--width);
+  height: var(--height);
+  z-index: var(--z);
+  pointer-events: none;
+  translate:
+    calc((1 - var(--open)) * var(--gather-x))
+    calc((1 - var(--open)) * var(--gather-y));
+  will-change: translate;
+}
+
+.floatLayer,
+.waveLayer,
+.floatLayer picture,
+.item {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.floatLayer {
+  animation: float calc(7s + var(--i) * 1.3s) ease-in-out infinite;
+  animation-delay: calc(var(--i) * -0.9s);
+  animation-play-state: paused;
+  will-change: transform;
+}
+
+.floating .floatLayer {
+  animation-play-state: running;
+}
+
+.touchDismiss {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.floating .interactive .waveLayer {
+  animation: interactionWave 3.57s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  animation-delay: calc(0.65s + var(--wave-order) * 0.15s);
+  will-change: transform;
+}
+
+@media (hover: hover) {
+  .floating:has(.interactive:hover) .interactive .waveLayer {
+    animation: none;
+  }
+}
+
+.item {
+  object-fit: contain;
+  transform: translate3d(0, 0, 0) scale(1);
+  transition: transform 780ms cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: transform;
+}
+
+.hitArea {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: block;
+  clip-path: var(--hit-area);
+  pointer-events: none;
+}
+
+.floating .interactive .hitArea {
+  pointer-events: auto;
+}
+
+.capsuleLayer {
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  pointer-events: none;
+}
+
+.capsule {
+  position: absolute;
+  left: var(--capsule-x);
+  top: var(--capsule-y);
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  min-height: 3.25rem;
+  padding: 0.55rem 1.8rem;
+  border-radius: 999px;
+  background: var(--color-capsule-bg);
+  box-shadow: 0 0.6rem 1.4rem rgb(0 0 0 / 24%);
+  color: var(--color-capsule-title);
+  font-family: var(--font-latin);
+  font-size: clamp(1.375rem, 2.8cqw, 1.75rem);
+  font-weight: var(--weight-display);
+  line-height: 1;
+  letter-spacing: 0.08em;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transform: translate3d(0, 0.65rem, 0) rotate(var(--capsule-rotate)) scale(0.752);
+  transition:
+    opacity var(--duration-medium) var(--ease-primary),
+    transform var(--duration-slow) var(--ease-primary);
+}
+
+.capsule[data-active='true'] {
+  opacity: 1;
+  transform: translate3d(0, 0, 0) rotate(var(--capsule-rotate)) scale(0.8);
+}
+
+@media (hover: hover) {
+  .world:has(.itemFrame[data-item='analyticsClipboard']:hover)
+    + .capsuleLayer .capsule[data-for='analyticsClipboard'],
+  .world:has(.itemFrame[data-item='glasses']:hover)
+    + .capsuleLayer .capsule[data-for='glasses'],
+  .world:has(.itemFrame[data-item='voicemic']:hover)
+    + .capsuleLayer .capsule[data-for='voicemic'],
+  .world:has(.itemFrame[data-item='molecularFormula']:hover)
+    + .capsuleLayer .capsule[data-for='molecularFormula'] {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) rotate(var(--capsule-rotate)) scale(0.8);
+  }
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) rotate(0deg);
+  }
+  50% {
+    transform: translate3d(
+        calc(var(--depth) * 0.5cqw),
+        calc(var(--depth) * -1.1cqh),
+        0
+      )
+      rotate(calc(var(--depth) * 0.6deg));
+  }
+}
+
+@keyframes interactionWave {
+  0%,
+  54%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  21% {
+    transform: translate3d(
+        calc(var(--depth) * 0.8cqw),
+        calc(var(--depth) * -1.4cqh),
+        0
+      )
+      scale(1.02);
+  }
+}
+
+/* Each hotspot drives its own image; the parent layer owns continuous floating. */
+@media (hover: hover) {
+  .interactive:hover .item {
+    transform: translate3d(
+        calc(var(--depth) * 0.8cqw),
+        calc(var(--depth) * -1.4cqh),
+        0
+      )
+      scale(1.02);
+  }
+}
+
+.interactive[data-active='true'] .item {
+  transform: translate3d(
+      calc(var(--depth) * 0.8cqw),
+      calc(var(--depth) * -1.4cqh),
+      0
+    )
+    scale(1.02);
+}
+
+@media (max-width: 768px) {
+  .floating .touchDismiss {
+    pointer-events: auto;
+  }
+
+  .capsule {
+    left: 50% !important;
+    right: auto !important;
+    top: calc(100% + 0.55rem) !important;
+    min-height: clamp(1.85rem, 7.4cqw, 2.25rem);
+    max-width: min(68cqw, 11.5rem);
+    padding: 0.34rem clamp(0.9rem, 4.2cqw, 1.15rem);
+    font-size: clamp(0.88rem, 4.4cqw, 1.08rem);
+    justify-content: center;
+    text-align: center;
+    transform: translate3d(-50%, 0.45rem, 0) rotate(0deg) scale(0.92) !important;
+    transform-origin: center center;
+  }
+
+  .capsule[data-active='true'] {
+    transform: translate3d(-50%, 0, 0) rotate(0deg) scale(0.96) !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .floatLayer {
+    animation: none;
+  }
+
+  .interactive .waveLayer {
+    animation: none;
+  }
+
+  .itemFrame {
+    translate: none;
+  }
+
+  .interactive:hover .item {
+    transform: scale(1.006);
+    transition-duration: 200ms;
+  }
+
+  .capsule {
+    transition-duration: var(--duration-fast);
+  }
+}

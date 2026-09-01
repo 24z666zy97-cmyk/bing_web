@@ -1,0 +1,131 @@
+/* 设计令牌 —— 全站颜色、字号、间距、动效的唯一来源。
+ *
+ * 取值来自 design.md 与 requirements.md。冲突时 requirements.md 优先。
+ * 组件不得硬编码颜色或时长，一律引用这里的变量。
+ */
+
+:root {
+  /* ============ 颜色 ============
+   * 六色色板，实测取色见 reference/color.jpg。
+   * requirements.md §5 裁决：统一采用 #FF6D99（取色图的 #FF6E99 是 JPG 压缩误差）。
+   */
+  --color-bg: #000000;
+  --color-pink: #ff6d99;      /* 主强调：L1 主题词、重点词、激活态、hover 填充。用量 5%–12% */
+  --color-pink-hot: #fc3570;  /* 仅装饰图案：贴纸、手绘线条、圆点、星形、光晕。不得用于文字。用量 ≤3% */
+  --color-text: #fcfff8;      /* 正文、导航 */
+  --color-blue: #5dbaff;      /* 卡片、信息模块（卡片内文字用黑） */
+  --color-yellow: #ffc11e;    /* 编号、箭头、贴纸、小标签、焦点环 */
+  --color-line: #2b2b2b;      /* 次要线条、图标描边。仅装饰分组，不承载信息 */
+  --color-surface: #111111;   /* 一级填充：大卡片、泳道、窗口主面板 */
+  --color-surface-raised: #171717; /* 二级填充：内嵌面板、附件与抬升容器 */
+  --color-surface-interactive: #303030; /* 交互填充：选中项与操作控件 */
+
+  /* 次要文字：色板里唯一的灰 #2B2B2B 在纯黑上对比度仅 1.48:1，读不出来。
+   * 改用正文白降透明度，对比度约 5:1，不引入新颜色。
+   * 用于 Loading 未完成模块、Content 编号等低权重文字。
+   */
+  --color-text-muted: rgb(252 255 248 / 55%);
+
+  /* 白胶囊上的文字。项目主人已确认接受 #FF6D99 在白底上的 2.6:1 对比度。 */
+  --color-capsule-bg: var(--color-text);
+  --color-capsule-title: var(--color-pink);
+
+  /* ============ 字体 ============
+   * 拉丁 Archivo 承担 L1；中文思源黑体承担 L2 / L3 / 正文。
+   * 变量由 next/font/local 在 layout.tsx 注入，此处只声明回退栈。
+   */
+  --font-latin: var(--font-archivo), 'Archivo', system-ui, -apple-system, sans-serif;
+  --font-cn: var(--font-source-han), 'Source Han Sans SC', 'Microsoft YaHei', sans-serif;
+
+  /* ============ 三级标题字号 ============
+   * requirements.md §4 的令牌，替代 design.md 4.2 那套按英文设计的字号。
+   * L1 : L2 至少 3 倍，否则层级不成立。
+   */
+
+  /* L1 仅用于英文：可负字距、可裁切 */
+  --font-l1: clamp(5rem, 16vw, 22rem);
+  --tracking-l1: -0.045em;
+  --leading-l1: 0.82;
+
+  /* L2 中文关键词：字距必须 >= 0 */
+  --font-l2: clamp(1.5rem, 3.4vw, 3.25rem);
+  --tracking-l2: 0.02em;
+  --leading-l2: 1.25;
+
+  /* L3 中文论述 */
+  --font-l3: clamp(1.0625rem, 1.6vw, 1.5rem);
+  --tracking-l3: 0.04em;
+  --leading-l3: 1.5;
+
+  /* 其余字号，来自 design.md 4.2。仅英文可用 hero / display 档。 */
+  --font-hero: clamp(10rem, 18vw, 28rem);
+  --font-display: clamp(4.5rem, 13vw, 16rem);
+  --font-heading-xl: clamp(3.25rem, 6.4vw, 9.25rem);
+  --font-heading-lg: clamp(2.5rem, 5.6vw, 7.8rem);
+  --font-heading-md: clamp(2.5rem, 2vw, 4.4rem);
+  --font-intro: clamp(2rem, 1.75vw, 3.65rem);
+  --font-body: clamp(1.0625rem, 1.2vw, 1.25rem);
+  --font-small: 0.75rem;
+
+  --weight-body: 400;
+  --weight-display: 700;
+
+  /* ============ 网格与间距 ============ */
+  --page-gutter: clamp(20px, 3.125vw, 60px);
+  --section-padding: clamp(5.5rem, 5.8vw, 11rem);
+  /* 首页的三段大分节留白：Hero / About / My Path / Content 共用。 */
+  --home-section-gap: clamp(9rem, 14.4vw, 16.2rem);
+  /* 分节内部相邻内容组团之间的统一节拍。 */
+  --home-group-gap: clamp(3.25rem, 4.6vw, 5rem);
+  /* 分页标题组与其下方首个内容组件的间距。 */
+  --home-heading-content-gap: clamp(7.15rem, 10.12vw, 11rem);
+  /* 同一组团内部（如头像 + View Resume）的紧凑间距。 */
+  --home-pair-gap: clamp(0.75rem, 1.3vw, 1.35rem);
+  --content-max-width: 120rem;
+  --measure: 40rem;        /* 正文最大宽度，design.md 4.4 */
+  --touch-target: 52px;    /* 交互元素最小触摸尺寸，requirements.md §10 */
+
+  /* Hero 高度放宽到 150svh，为撕纸留滚动行程（requirements.md §7.0.2） */
+  --hero-height: 150svh;
+
+  /* ============ 动效 ============ */
+  --duration-fast: 150ms;
+  --duration-default: 300ms;
+  --duration-medium: 450ms;
+  --duration-slow: 600ms;
+  --duration-slower: 900ms;
+  --ease-primary: cubic-bezier(0.645, 0, 0, 1);
+  --ease-bounce: cubic-bezier(0.4, 1.65, 0.3, 1);
+
+  /* 动效幅度系数。reduced-motion 下降到 0.3 而非归零 —— 降幅不全关
+   * （requirements.md §10）。视差、循环、弹簧统一乘这个系数。
+   */
+  --motion-scale: 1;
+
+  /* ============ 层级 ============
+   * 集中声明，避免各组件自己猜 z-index。
+   * 顺序来自 content.md §3 的 Hero 视觉层级。
+   */
+  --z-hero-name: 10;      /* 超大姓名，最后层 */
+  --z-brain: 20;          /* 脑内物件 */
+  --z-face: 30;           /* 头像外壳与撕裂白边，遮住物件下部 */
+  --z-foreground: 40;     /* 明确位于最前的贴纸与装饰 */
+  --z-nav: 100;           /* 导航三件套 */
+  --z-overlay: 200;       /* Content 全屏覆盖层、Contact 面板 */
+  --z-loading: 300;       /* 开场动画，盖住一切 */
+}
+
+@media (width <= 40rem) {
+  :root {
+    --home-section-gap: clamp(6.3rem, 23.4vw, 8.55rem);
+    --home-group-gap: clamp(2.25rem, 9vw, 3rem);
+    --home-heading-content-gap: clamp(4.95rem, 19.8vw, 6.6rem);
+    --home-pair-gap: clamp(0.65rem, 3vw, 0.9rem);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --motion-scale: 0.3;
+  }
+}

@@ -1,0 +1,309 @@
+/* 四行 Content 导览列表（content.md §5–§7）。
+ *
+ * 这个组件一套三用：首页最后一屏、菜单切出的全屏覆盖层、子页页尾。
+ * 差异只在外层容器（见 ContentSection.module.css），列表本身完全共用。
+ */
+
+.list {
+  display: flex;
+  flex-direction: column;
+
+  /* 分隔线只贯穿右侧列表宽度，不延伸到左侧人物区（content.md §5） */
+  border-top: 1px solid var(--color-line);
+}
+
+.row {
+  /* 贴纸右边缘贴近胶囊圆角切线，但不进入半圆端部。 */
+  --row-safe-inline: clamp(4.25rem, 5vw, 5rem);
+
+  position: relative;
+
+  display: grid;
+  /* 编号列固定，标题列吃掉剩余宽度 */
+  grid-template-columns: clamp(2.5rem, 4vw, 4rem) 1fr;
+  align-items: center;
+  gap: clamp(1rem, 2vw, 2.5rem);
+
+  /* 行高充足，文字周围保留明显黑色留白（content.md §5） */
+  min-height: clamp(8rem, 18svh, 10rem);
+  padding-block: 0;
+  padding-inline: clamp(1rem, 2.5vw, 2.5rem);
+
+  border-bottom: 1px solid var(--color-line);
+
+  color: var(--color-text);
+  text-decoration: none;
+
+  /* 胶囊靠 border-radius 从 0 到全圆角过渡 */
+  border-radius: 0;
+
+  transition:
+    background-color var(--duration-default) var(--ease-primary),
+    border-radius var(--duration-default) var(--ease-primary);
+}
+
+/* hover 行变白色大胶囊。两端为充分圆润的半圆（content.md §7）。
+ * 用 :focus-visible 一起，键盘操作也能看到同样的激活态。 */
+.row:hover,
+.row[data-active='true'],
+.row:focus-visible {
+  background: var(--color-capsule-bg);
+
+  /* 足够大的值即得到半圆端，不需要精确算行高 */
+  border-radius: 999px;
+
+  /* 胶囊出现时相邻分隔线会与圆角打架，激活行自己隐掉下边线 */
+  border-bottom-color: transparent;
+
+  /* 胶囊在浮现素材前方，对素材形成裁切遮挡（content.md §7） */
+  z-index: 2;
+}
+
+.row:focus-visible {
+  outline: 2px solid var(--color-yellow);
+  outline-offset: 3px;
+}
+
+/* 编号：默认低对比，激活后变清晰深色（content.md §6、§7） */
+.num {
+  position: relative;
+  z-index: 3;
+
+  transform: none;
+
+  font-size: 1.125rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.08em;
+  color: var(--color-text-muted);
+
+  transition: color var(--duration-default) var(--ease-primary);
+}
+
+.row:hover .num,
+.row[data-active='true'] .num,
+.row:focus-visible .num {
+  color: var(--color-bg);
+}
+
+/* 标题与 tagline 叠在同一格里做上下切换。
+ * 用 grid 单格叠放而不是绝对定位，行高由较高的一方撑出来，
+ * 切换时不会跳动（content.md §7：不让列表产生明显跳动）。 */
+.titleSlot {
+  position: relative;
+  z-index: 3;
+
+  display: grid;
+  overflow: hidden;
+  padding-block: 0.14em;
+  margin-block: -0.14em;
+  /* 字号跟随右栏自身宽度，而不是整张视口，避免与左侧人物争抢空间。 */
+  font-size: clamp(2.75rem, 11cqi, 7.8rem);
+  line-height: var(--leading-l1);
+  /* Anybody 的大写字形视觉重心略偏上，向下做少量光学补偿，
+   * 让字形主体与上下分隔线之间的留白一致。 */
+  transform: translateY(0.35rem);
+}
+
+.row:hover .titleSlot,
+.row[data-active='true'] .titleSlot,
+.row:focus-visible .titleSlot {
+  transform: translateY(0.35rem);
+}
+
+.list:has(.row:first-child:hover),
+.list:has(.row:first-child[data-active='true']),
+.list:has(.row:first-child:focus-visible) {
+  border-top-color: transparent;
+}
+
+.row:has(+ .row:hover),
+.row:has(+ .row[data-active='true']),
+.row:has(+ .row:focus-visible) {
+  border-bottom-color: transparent;
+}
+
+.title,
+.tagline {
+  grid-area: 1 / 1;
+
+  /* 标题位置保持与其他行对齐，不因胶囊出现而左右移动 */
+  text-align: left;
+
+  transition:
+    transform var(--duration-default) var(--ease-primary),
+    opacity var(--duration-default) var(--ease-primary);
+}
+
+/* 四个标题全为英文，属 L1 档，可用负字距（design.md 4.1）。
+ * 尺寸用 heading-lg：比 L1 收敛，避免四行叠起来超出一屏。 */
+.title {
+  font-family: var(--font-anybody), sans-serif;
+  font-size: inherit;
+  font-weight: var(--weight-display);
+  font-variation-settings: 'wght' 800, 'wdth' 90;
+  line-height: inherit;
+  letter-spacing: 0;
+  white-space: nowrap;
+}
+
+/* 激活时标题由白变粉。白胶囊 + 粉标题为项目主人明确选定的方案。 */
+.row:hover .title,
+.row[data-active='true'] .title,
+.row:focus-visible .title {
+  color: var(--color-capsule-title);
+
+  /* 标题上移让位给切入的 tagline */
+  opacity: 0;
+  transform: translateY(-100%);
+}
+
+/* tagline 默认藏在下方，激活时从下侧切出（content.md §7） */
+.tagline {
+  align-self: center;
+
+  font-size: clamp(1rem, 3.2cqi, 2rem);
+  font-weight: 700;
+  line-height: var(--leading-l3);
+
+  /* 中文字距必须 >= 0（design.md 红线） */
+  letter-spacing: var(--tracking-l3);
+  white-space: nowrap;
+
+  color: var(--color-capsule-title);
+
+  /* 中文切换文案位于装饰贴纸上层；白色描边保证经过复杂素材时仍清晰。
+   * 英文标题不继承此规则。 */
+  -webkit-text-stroke: 2px var(--color-capsule-bg);
+  paint-order: stroke fill;
+
+  opacity: 0;
+  transform: translateY(100%);
+}
+
+.row:hover .tagline,
+.row[data-active='true'] .tagline,
+.row:focus-visible .tagline {
+  opacity: 1;
+  transform: translateY(-0.35rem);
+}
+
+/* hover 浮现的代表素材：位于胶囊右侧，被胶囊裁切遮挡（content.md §7）。
+ * 放在行内并压在胶囊下层（z-index 1 < 胶囊的 2）。 */
+.assetClip {
+  position: absolute;
+  /* 胶囊两端各留出一个圆角半径；贴纸只在中部直边安全区活动。 */
+  right: var(--row-safe-inline);
+  /* 贴纸允许越过胶囊上沿，但在胶囊下沿统一截断。这里配合
+   * translateY(-8%) 与底部 18% 裁切，使可见下边缘落在行底。 */
+  bottom: clamp(-57px, -3.64vw, -39px);
+  z-index: 1;
+  display: block;
+
+  /* 四张素材的纵横比差异很大；按高度统一视觉尺度，避免细长的
+   * 麦克风因统一宽度而显得远大于其他贴纸。 */
+  width: auto;
+  height: clamp(150px, 14vw, 220px);
+  aspect-ratio: 427 / 404;
+  overflow: visible;
+  clip-path: inset(0 0 18% 0);
+
+  opacity: 0;
+  transform: translateY(30%);
+  pointer-events: none;
+
+  transition:
+    opacity var(--duration-default) var(--ease-primary),
+    transform var(--duration-slow) var(--ease-bounce);
+}
+
+.row[data-section-num='02'] .assetClip {
+  aspect-ratio: 336 / 463;
+}
+
+.row[data-section-num='03'] .assetClip {
+  aspect-ratio: 309 / 592;
+}
+
+.row[data-section-num='04'] .assetClip {
+  aspect-ratio: 240 / 647;
+}
+
+.asset {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  transform: rotate(-6deg);
+  transform-origin: center;
+}
+
+.row:hover .assetClip,
+.row[data-active='true'] .assetClip,
+.row:focus-visible .assetClip {
+  opacity: 1;
+  /* 只露出最有识别度的部分，其余被胶囊压住 */
+  transform: translateY(-8%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .row,
+  .title,
+  .tagline,
+  .num,
+  .assetClip {
+    transition-duration: 1ms;
+  }
+
+  .assetClip {
+    transform: translateY(-8%);
+  }
+}
+
+/* 手机与平板：编号移到标题上方，素材不再浮现（content.md §11）。
+ * 触摸设备没有 hover，激活态完全由 data-active 驱动。 */
+@media (width <= 40rem) {
+  .list {
+    gap: 0.5rem;
+    border-top: 0;
+  }
+
+  .row {
+    --row-safe-inline: clamp(3rem, 12vw, 4rem);
+    grid-template-columns: clamp(2.75rem, 12vw, 3.75rem) minmax(0, 1fr);
+    gap: 0.5rem;
+    min-height: clamp(5rem, 20vw, 6rem);
+    padding: 0.75rem clamp(1.15rem, 5vw, 1.75rem);
+    border: 1px solid rgb(255 255 255 / 16%);
+    border-radius: 999px;
+    background: rgb(255 255 255 / 4%);
+  }
+
+  .titleSlot {
+    font-size: clamp(2.15rem, 12vw, 3.4rem);
+    transform: none;
+  }
+
+  .title,
+  .tagline {
+    text-align: center;
+  }
+
+  .tagline {
+    font-size: clamp(0.65rem, 2.7vw, 0.95rem);
+    line-height: 1.2;
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+  }
+
+  /* 小屏胶囊改用小圆角，全圆角在窄宽度下会把文字挤变形 */
+  .row:hover,
+  .row[data-active='true'],
+  .row:focus-visible {
+    border-radius: 999px;
+  }
+
+  .assetClip {
+    display: none;
+  }
+}

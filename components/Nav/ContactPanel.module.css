@@ -1,0 +1,298 @@
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-overlay);
+  background: transparent;
+  opacity: 0;
+  transition: opacity var(--duration-default) var(--ease-primary);
+}
+
+.backdrop[data-open='true'] {
+  opacity: 1;
+}
+
+/* 面板从上方下滑出现（内容稿：点击后在下侧滑出） */
+.panel {
+  position: fixed;
+  top: calc(var(--nav-top, clamp(20px, 2.5vw, 36px)) + clamp(38px, 3.2vw, 48px) + 12px);
+  right: var(--page-gutter);
+  z-index: calc(var(--z-overlay) + 1);
+
+  width: min(25rem, calc(100vw - 2 * var(--page-gutter)));
+  aspect-ratio: 1.35 / 1;
+  padding: 1.5rem 1.75rem;
+  border: 1px solid var(--color-blue);
+  border-radius: clamp(1.1rem, 1.8vw, 1.5rem);
+  background: var(--color-bg);
+  font-family: var(--font-latin);
+  letter-spacing: 0.08em;
+  box-shadow:
+    0 1.25rem 3rem rgb(0 0 0 / 45%),
+    0 0 0 1px rgb(252 255 248 / 8%) inset;
+
+  opacity: 0;
+  transform: translate3d(0, -0.65rem, 0) scale(0.96);
+  transform-origin: top right;
+  transition:
+    opacity var(--duration-default) var(--ease-primary),
+    transform var(--duration-default) var(--ease-bounce);
+}
+
+.panel[data-open='true'] {
+  opacity: 1;
+  transform: translate3d(0, 0, 0) scale(1);
+}
+
+.inner {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.65rem;
+  height: 100%;
+}
+
+.closeButton {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--color-text);
+  font-size: 1.125rem;
+  line-height: 1;
+  cursor: pointer;
+
+  transition:
+    background-color var(--duration-default) var(--ease-primary),
+    color var(--duration-default) var(--ease-primary),
+    transform var(--duration-default) var(--ease-bounce);
+}
+
+.closeButton:hover {
+  background: transparent;
+  color: var(--color-pink);
+}
+
+.closeButton:active {
+  transform: scale(0.92);
+}
+
+.closeIcon,
+.closeIcon::after {
+  display: block;
+  width: 48%;
+  height: 2px;
+  border-radius: 999px;
+  background: currentColor;
+  transform: rotate(45deg);
+}
+
+.closeIcon::after {
+  content: '';
+  width: 100%;
+  transform: rotate(90deg);
+}
+
+/* ============ 问候语 ============ */
+
+.greeting {
+  display: flex;
+  flex-direction: column;
+  gap: 0.28rem;
+  padding-right: 2.5rem;
+}
+
+.greetingEn {
+  position: relative;
+  width: max-content;
+  margin: 0 0 0.28rem;
+  font-family: var(--font-latin);
+  font-size: 0.82rem;
+  font-weight: var(--weight-display);
+  line-height: 1.2;
+  letter-spacing: 0.08em;
+  color: var(--color-text);
+}
+
+.connectTitle {
+  max-width: 8em;
+  margin: 0;
+  color: var(--color-text);
+  font-family: var(--font-latin);
+  font-size: 2.15rem;
+  font-weight: 800;
+  line-height: 0.88;
+  letter-spacing: 0.08em;
+  white-space: nowrap;
+}
+
+.connectTitle span {
+  color: var(--color-pink);
+}
+
+.greetingZh {
+  font-family: var(--font-cn);
+  font-size: 0.72rem;
+  /* 中文不允许负字距（requirements.md §5） */
+  letter-spacing: 0.02em;
+  margin: 0.15rem 0 0;
+  padding-left: 0.6rem;
+  border-left: 0.16rem solid var(--color-pink);
+  color: var(--color-text-muted);
+}
+
+/* ============ 联系方式 ============ */
+
+.fields {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.28rem;
+}
+
+.label {
+  font-family: var(--font-latin);
+  font-size: 0.62rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-blue);
+}
+
+.valueRow {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.55rem;
+  min-height: 2.7rem;
+  padding: 0.32rem 0.45rem;
+  border: 1px solid rgb(93 186 255 / 32%);
+  border-radius: 0.8rem;
+  background: rgb(252 255 248 / 2%);
+}
+
+.fieldIcon {
+  display: grid;
+  place-items: center;
+  width: 1.9rem;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: var(--color-pink);
+  color: var(--color-text);
+  box-shadow: 0 0.45rem 1rem rgb(225 101 153 / 24%);
+}
+
+.fieldIcon svg {
+  width: 48%;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.value {
+  font-family: var(--font-latin);
+  min-width: 0;
+  font-size: 0.78rem;
+  font-weight: var(--weight-display);
+  letter-spacing: 0.08em;
+  color: var(--color-text);
+  /* 邮箱在窄屏可能超出，允许断行而不是溢出 */
+  overflow-wrap: anywhere;
+}
+
+/* 电话在移动端是拨号链接 */
+.valueLink {
+  color: inherit;
+  text-decoration: none;
+  border-bottom: 2px solid transparent;
+  transition:
+    color var(--duration-default) var(--ease-primary),
+    border-color var(--duration-default) var(--ease-primary);
+}
+
+.valueLink:hover {
+  color: var(--color-pink);
+  border-bottom-color: var(--color-pink);
+}
+
+.copyButton {
+  flex-shrink: 0;
+  padding: 0.45em 0.8em;
+  border: 1px solid rgb(93 186 255 / 62%);
+  border-radius: 999px;
+  background: none;
+  cursor: pointer;
+
+  font-family: var(--font-latin);
+  font-size: 0.6rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-pink);
+
+  transition:
+    color var(--duration-default) var(--ease-primary),
+    border-color var(--duration-default) var(--ease-primary),
+    transform var(--duration-fast) var(--ease-bounce);
+}
+
+.copyButton:hover {
+  color: var(--color-pink);
+  border-color: var(--color-pink);
+}
+
+.copyButton:active {
+  transform: scale(0.94);
+}
+
+/* 复制成功反馈 */
+.copyButton[data-copied='true'] {
+  color: var(--color-pink);
+  border-color: var(--color-pink);
+}
+
+@media (width <= 520px) {
+  .panel {
+    top: calc(var(--nav-top, 20px) + 50px);
+    right: var(--page-gutter);
+    width: min(22rem, calc(100vw - 2 * var(--page-gutter)));
+    aspect-ratio: auto;
+    padding: 1.35rem;
+  }
+
+  .valueRow {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .copyButton {
+    grid-column: 1 / -1;
+    justify-self: stretch;
+  }
+
+  .connectTitle {
+    font-size: 2rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .panel {
+    transition-duration: var(--duration-fast);
+  }
+
+  .closeButton:active,
+  .copyButton:active {
+    transform: none;
+  }
+}

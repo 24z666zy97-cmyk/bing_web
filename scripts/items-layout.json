@@ -1,0 +1,153 @@
+{
+  "cloud": {
+    "canvas": {
+      "width": 1068,
+      "height": 1213
+    },
+    "px": {
+      "left": 101,
+      "top": 223,
+      "right": 465,
+      "bottom": 462,
+      "width": 364,
+      "height": 239
+    },
+    "pct": {
+      "left": 9.457,
+      "top": 18.384,
+      "width": 34.082,
+      "height": 19.703
+    },
+    "zIndex": 1
+  },
+  "brain": {
+    "canvas": {
+      "width": 1068,
+      "height": 1213
+    },
+    "px": {
+      "left": 157,
+      "top": 220,
+      "right": 695,
+      "bottom": 612,
+      "width": 538,
+      "height": 392
+    },
+    "pct": {
+      "left": 14.7,
+      "top": 18.137,
+      "width": 50.375,
+      "height": 32.317
+    },
+    "zIndex": 2
+  },
+  "analyticsClipboard": {
+    "canvas": {
+      "width": 1068,
+      "height": 1213
+    },
+    "px": {
+      "left": 660,
+      "top": 186,
+      "right": 980,
+      "bottom": 633,
+      "width": 320,
+      "height": 447
+    },
+    "pct": {
+      "left": 61.798,
+      "top": 15.334,
+      "width": 29.963,
+      "height": 36.851
+    },
+    "zIndex": 3,
+    "capsule": "SENSE"
+  },
+  "glasses": {
+    "canvas": {
+      "width": 1068,
+      "height": 1213
+    },
+    "px": {
+      "left": 359,
+      "top": 62,
+      "right": 652,
+      "bottom": 638,
+      "width": 293,
+      "height": 576
+    },
+    "pct": {
+      "left": 33.614,
+      "top": 5.111,
+      "width": 27.434,
+      "height": 47.486
+    },
+    "zIndex": 4,
+    "capsule": "SIGNALS"
+  },
+  "voicemic": {
+    "canvas": {
+      "width": 1068,
+      "height": 1213
+    },
+    "px": {
+      "left": 549,
+      "top": 28,
+      "right": 773,
+      "bottom": 659,
+      "width": 224,
+      "height": 631
+    },
+    "pct": {
+      "left": 51.404,
+      "top": 2.308,
+      "width": 20.974,
+      "height": 52.02
+    },
+    "zIndex": 5,
+    "capsule": "STAGES"
+  },
+  "molecularFormula": {
+    "canvas": {
+      "width": 1068,
+      "height": 1213
+    },
+    "px": {
+      "left": 36,
+      "top": 176,
+      "right": 447,
+      "bottom": 564,
+      "width": 411,
+      "height": 388
+    },
+    "pct": {
+      "left": 3.371,
+      "top": 14.509,
+      "width": 38.483,
+      "height": 31.987
+    },
+    "zIndex": 6,
+    "capsule": "SYSTEM"
+  },
+  "heart": {
+    "canvas": {
+      "width": 1068,
+      "height": 1213
+    },
+    "px": {
+      "left": 534,
+      "top": 400,
+      "right": 710,
+      "bottom": 555,
+      "width": 176,
+      "height": 155
+    },
+    "pct": {
+      "left": 50.0,
+      "top": 32.976,
+      "width": 16.479,
+      "height": 12.778
+    },
+    "zIndex": 7
+  }
+}

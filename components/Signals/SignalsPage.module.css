@@ -1,0 +1,119 @@
+.heroTitleGroup { z-index: 1 !important; width: min(86vw, 104rem); }
+.heroTitleFront { width: min(86vw, 104rem); z-index: 3 !important; }
+.heroWordMiddle { color: transparent !important; }
+.heroWordMiddle > span { color: transparent !important; }
+.heroWordMiddle > .heroWordMiddleVisible {
+  color: var(--color-pink) !important;
+  filter: drop-shadow(-6px 8px 7px rgb(0 0 0 / 20%));
+}
+.heroModel {
+  z-index: auto !important;
+  inset: 5% 4% 8%;
+  animation: none !important;
+  transform: none !important;
+  opacity: 1 !important;
+  filter: none !important;
+  will-change: auto !important;
+  pointer-events: none;
+  isolation: auto;
+}
+.heroCanvas { position: absolute; z-index: auto !important; inset: 0; width: 100%; height: 100%; filter: none !important; pointer-events: auto; isolation: auto; }
+.page :global(.signalsGlassesScene) {
+  position: absolute;
+  pointer-events: none;
+  transform-origin: center;
+  animation: signals-glasses-enter 1.1s var(--ease-bounce) 1.1s both;
+}
+.page :global(.signalsGlassesRear) { z-index: 2 !important; }
+.page :global(.signalsGlassesFront) { z-index: 4 !important; filter: drop-shadow(-14px 20px 14px rgb(0 0 0 / 48%)); }
+
+@keyframes signals-glasses-enter {
+  from { opacity: 0; translate: 0 48svh; rotate: 12deg; scale: .72; }
+  to { opacity: 1; translate: 0 0; rotate: 0deg; scale: 1; }
+}
+
+.archiveSlot {
+  position: relative;
+  left: 50%;
+  width: 100vw;
+  margin: var(--home-heading-content-gap) auto 0;
+  margin-left: -50vw;
+  overflow: hidden;
+}
+
+.archiveGallery {
+  --archive-gap: clamp(.55rem, 1vw, 1rem);
+  --archive-card-height: clamp(10.5rem, 17vw, 17.5rem);
+  --archive-radius: clamp(.75rem, 1.2vw, 1.15rem);
+  display: grid;
+  gap: var(--archive-gap);
+  padding-block: clamp(.25rem, 1vw, .8rem);
+  contain: layout paint style;
+  content-visibility: auto;
+  contain-intrinsic-size: auto 56rem;
+}
+
+.archiveGallery[data-active='false'] .archiveTrack { animation-play-state: paused; }
+
+.archiveRow {
+  box-sizing: border-box;
+  width: min(calc(100% - var(--page-gutter) - var(--page-gutter)), 80vw);
+  height: var(--archive-card-height);
+  margin-inline: auto;
+  overflow: hidden;
+  border: 0;
+  border-radius: var(--archive-radius);
+  background: transparent;
+  outline: none;
+  cursor: grab;
+  touch-action: pan-y;
+  user-select: none;
+}
+
+.archiveRow[data-dragging='true'] { cursor: grabbing; }
+.archiveRow[data-dragging='true'] .archiveTrack { animation-play-state: paused; }
+
+.archiveTrack {
+  display: flex;
+  width: max-content;
+  height: 100%;
+  gap: var(--archive-gap);
+  will-change: transform;
+  animation: archive-forward var(--archive-duration) linear infinite;
+}
+
+.archiveTrack[data-direction='reverse'] { animation-name: archive-reverse; }
+.archiveSequence { display: flex; flex: none; height: 100%; gap: var(--archive-gap); }
+.archivePicture { display: block; flex: none; height: 100%; overflow: hidden; border: 1px solid rgb(255 255 255 / 15%); border-radius: var(--archive-radius); background: #111; }
+.archivePicture img { display: block; width: auto; height: 100%; object-fit: contain; }
+
+@keyframes archive-forward {
+  from { transform: translate3d(0, 0, 0); }
+  to { transform: translate3d(calc(-50% - var(--archive-gap) / 2), 0, 0); }
+}
+
+@keyframes archive-reverse {
+  from { transform: translate3d(calc(-50% - var(--archive-gap) / 2), 0, 0); }
+  to { transform: translate3d(0, 0, 0); }
+}
+
+@media (max-width: 991px) {
+  .heroModel { inset: 7% 2% 11%; }
+}
+
+@media (max-width: 767px) {
+  .heroTitleGroup, .heroTitleFront { width: 96vw; }
+  .heroModel { inset: 0 0 22%; }
+  .heroWordMiddleVisible { filter: drop-shadow(-3px 4px 5px rgb(0 0 0 / 20%)); }
+  .heroCanvas { filter: drop-shadow(-8px 11px 8px rgb(0 0 0 / 40%)); }
+  .archiveGallery { --archive-card-height: clamp(8rem, 36vw, 11rem); --archive-radius: .75rem; }
+  .archiveRow { width: calc(100% - var(--page-gutter) - var(--page-gutter)); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page :global(.signalsGlassesScene) { animation: none; }
+  .archiveRow { overflow-x: auto; scrollbar-width: none; }
+  .archiveRow::-webkit-scrollbar { display: none; }
+  .archiveTrack { animation: none; }
+  .archiveSequence[aria-hidden='true'] { display: none; }
+}

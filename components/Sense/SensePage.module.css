@@ -1,0 +1,144 @@
+.heroCanvas {
+  filter: drop-shadow(-18px 22px 14px rgb(0 0 0 / 55%));
+}
+
+.heroFrontSe {
+  filter: drop-shadow(-6px 8px 7px rgb(0 0 0 / 20%));
+}
+
+.practiceLead {
+  width: min(100%, 1200px);
+  min-height: 2em;
+  margin: 0 auto;
+  color: var(--color-text);
+  font-size: clamp(1rem, 1.65vw, 1.5rem);
+  font-weight: 700;
+  letter-spacing: .04em;
+  line-height: 2;
+  text-align: center;
+}
+
+.practiceSectionLead {
+  margin-top: var(--home-group-gap);
+}
+
+.evaluationThinking {
+  margin-top: var(--home-group-gap);
+}
+
+.evaluationFollowup {
+  margin-top: var(--home-group-gap);
+}
+
+.practiceLayout {
+  display: grid;
+  grid-template-columns: 64px minmax(0, 1200px);
+  justify-content: center;
+  gap: 24px;
+  margin-top: var(--home-group-gap);
+  transform: translateX(-44px);
+}
+
+.practiceRail {
+  position: sticky;
+  top: calc(50svh - 111px);
+  z-index: calc(var(--z-nav) - 10);
+  isolation: isolate;
+  height: max-content;
+  display: grid;
+  justify-items: center;
+  gap: 14px;
+}
+
+.practiceRail a {
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  border: 1px solid transparent;
+  border-radius: 50%;
+  color: var(--color-text-muted);
+  transition: color var(--duration-fast) var(--ease-primary), background var(--duration-fast) var(--ease-primary), transform var(--duration-fast) var(--ease-primary);
+}
+
+.practiceRail a:hover,
+.practiceRail a:focus-visible {
+  color: var(--color-text);
+  transform: translateY(-2px);
+}
+
+.practiceRail .practiceRailActive {
+  width: 54px;
+  height: 54px;
+  border-color: var(--color-line);
+  background: var(--color-surface-raised);
+  color: var(--color-blue);
+}
+
+.practiceRail svg {
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.practiceSections,
+.practiceSection {
+  min-width: 0;
+}
+
+.practiceSection {
+  scroll-margin-top: clamp(5rem, 10svh, 7rem);
+}
+
+@media (max-width: 1399px) and (min-width: 768px) {
+  .practiceLayout {
+    grid-template-columns: 54px minmax(0, 1fr);
+    gap: 16px;
+    width: 100%;
+    transform: none;
+  }
+}
+
+@media (max-width: 767px) {
+  .heroCanvas {
+    filter: drop-shadow(-9px 12px 8px rgb(0 0 0 / 42%));
+  }
+
+  .heroFrontSe {
+    filter: drop-shadow(-3px 4px 5px rgb(0 0 0 / 20%));
+  }
+
+  .practiceLayout {
+    display: block;
+    margin-top: 0;
+    transform: none;
+  }
+
+  .practiceLead {
+    margin-bottom: var(--home-group-gap);
+  }
+
+  .practiceRail {
+    top: 5.25rem;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+    width: min(100%, 9rem);
+    margin: 0 auto var(--home-heading-content-gap);
+    padding: 6px;
+    border: 1px solid var(--color-line);
+    border-radius: 999px;
+    background: rgb(0 0 0 / 72%);
+    backdrop-filter: blur(12px);
+    transform: translateZ(0);
+  }
+
+  .practiceRail a,
+  .practiceRail .practiceRailActive {
+    width: 42px;
+    height: 42px;
+  }
+}

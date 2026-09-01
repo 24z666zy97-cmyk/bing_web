@@ -1,0 +1,263 @@
+/* ============ 右上角：菜单 + CONTACT ============ */
+
+.dock {
+  display: contents;
+}
+
+.cluster {
+  --nav-start-offset: clamp(220px, 30svh, 300px);
+  --nav-start-scale: 0.2;
+
+  position: fixed;
+  top: var(--nav-top, clamp(20px, 2.5vw, 36px));
+  right: var(--page-gutter);
+  z-index: var(--z-nav);
+  isolation: isolate;
+
+  display: flex;
+  align-items: center;
+  gap: clamp(10px, 1vw, 16px);
+  transform-origin: top right;
+  transform: translate3d(
+      0,
+      calc((1 - var(--nav-dock-progress)) * var(--nav-start-offset)),
+      0
+    )
+    scale(calc(1 + (1 - var(--nav-dock-progress)) * var(--nav-start-scale)));
+  will-change: transform;
+}
+
+/* 局部撕开完成前隐藏。用 visibility 而非 display，
+ * 这样切入动画有起始状态可以过渡。 */
+.cluster[data-visible='false'] {
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.cluster[data-visible='true'] {
+  visibility: visible;
+  opacity: 1;
+  transition: opacity var(--duration-slow) var(--ease-primary);
+}
+
+/* 共享按钮底子：白底，hover 转粉 */
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  border: none;
+  background: var(--color-text);
+  color: var(--color-bg);
+  cursor: pointer;
+
+  font-family: var(--font-latin);
+  font-weight: var(--weight-display);
+  letter-spacing: 0.08em;
+
+  transition:
+    background-color var(--duration-default) var(--ease-primary),
+    color var(--duration-default) var(--ease-primary),
+    transform var(--duration-default) var(--ease-bounce);
+}
+
+.button:hover {
+  background: var(--color-pink);
+}
+
+/* 轻微压缩，与 Hero 的弹性语言一致（content.md §10） */
+.button:active {
+  transform: scale(0.94);
+}
+
+.menuButton {
+  /* 圆形，尺寸跟着胶囊高度走 */
+  width: var(--nav-button-size);
+  height: var(--nav-button-size);
+  border-radius: 50%;
+}
+
+/* 三条横线。用 span 而非字符，保证粗细和间距可控。 */
+.menuIcon {
+  position: relative;
+  display: block;
+  width: 40%;
+  height: 2px;
+  background: currentColor;
+  border-radius: 2px;
+}
+
+.menuIcon::before,
+.menuIcon::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: currentColor;
+  border-radius: inherit;
+  transition: transform var(--duration-default) var(--ease-primary);
+}
+
+.menuIcon::before {
+  transform: translateY(-6px);
+}
+
+.menuIcon::after {
+  transform: translateY(6px);
+}
+
+/* 打开状态变叉号（content.md:547） */
+.menuButton[aria-expanded='true'] .menuIcon {
+  background: transparent;
+}
+
+.menuButton[aria-expanded='true'] .menuIcon::before {
+  transform: translateY(0) rotate(45deg);
+}
+
+.menuButton[aria-expanded='true'] .menuIcon::after {
+  transform: translateY(0) rotate(-45deg);
+}
+
+.contactButton {
+  height: var(--nav-button-size);
+  padding-inline: clamp(18px, 1.8vw, 28px);
+  border-radius: calc(var(--nav-button-size) / 2);
+
+  font-size: clamp(0.75rem, 0.95vw, 0.875rem);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+/* ============ 左上角：Personal Presence Indicator ============ */
+
+.indicator {
+  --indicator-start-offset: clamp(220px, 30svh, 300px);
+
+  position: fixed;
+  top: var(--nav-top, clamp(20px, 2.5vw, 36px));
+  left: var(--page-gutter);
+  z-index: var(--z-nav);
+  isolation: isolate;
+
+  display: inline-flex;
+  align-items: center;
+  height: var(--nav-button-size);
+
+  border: none;
+  background: none;
+  padding: 0;
+  cursor: pointer;
+
+  font-family: var(--font-anybody), sans-serif;
+  font-size: calc(var(--nav-button-size) * 0.6667);
+  font-weight: 800;
+  font-variation-settings: 'wght' 800, 'wdth' 90;
+  line-height: 0.82;
+  letter-spacing: 0;
+  color: var(--color-pink);
+  /* 子页里 Indicator 渲染成 <a>，去掉默认下划线 */
+  text-decoration: none;
+  transform: translate3d(
+    0,
+    calc(
+      (1 - var(--indicator-progress, 0)) * var(--indicator-start-offset)
+    ),
+    0
+  );
+  will-change: transform, opacity;
+
+  transition: color var(--duration-default) var(--ease-primary);
+}
+
+.indicator:hover {
+  color: var(--color-pink);
+}
+
+/* ============ 响应式 ============ */
+
+.cluster,
+.indicator {
+  --nav-button-size: clamp(38px, 3.2vw, 48px);
+}
+
+@media (max-width: 640px) {
+  .dock {
+    position: fixed;
+    top: var(--nav-top, clamp(20px, 2.5vw, 36px));
+    right: var(--page-gutter);
+    left: var(--page-gutter);
+    z-index: var(--z-nav);
+    isolation: isolate;
+    transform: translateZ(0);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    pointer-events: none;
+  }
+
+  .dock::before {
+    position: absolute;
+    z-index: -1;
+    inset: calc(-1 * var(--nav-top, clamp(20px, 2.5vw, 36px)))
+      calc(-1 * var(--page-gutter)) -12px;
+    background: linear-gradient(
+      180deg,
+      var(--color-bg) 0%,
+      var(--color-bg) 72%,
+      transparent 100%
+    );
+    opacity: var(--nav-backdrop-progress, 0);
+    content: '';
+    pointer-events: none;
+    transition: opacity var(--duration-default) var(--ease-primary);
+  }
+
+  .cluster {
+    /* Start below the home title, then converge on the shared dock line. */
+    --nav-start-offset: clamp(64px, 9svh, 72px);
+    --nav-start-scale: 0;
+
+    position: relative;
+    top: auto;
+    right: auto;
+    z-index: auto;
+    flex: 0 0 auto;
+    pointer-events: auto;
+  }
+
+  .indicator {
+    --indicator-start-offset: clamp(90px, 14svh, 120px);
+
+    position: relative;
+    top: auto;
+    left: auto;
+    z-index: auto;
+    min-width: 0;
+    max-width: none;
+    flex: 0 1 auto;
+    font-size: clamp(1rem, 5vw, 1.5rem);
+    white-space: nowrap;
+    pointer-events: auto;
+  }
+
+  .contactButton {
+    /* 手机上收窄内边距，避免两个按钮挤到肖像上 */
+    padding-inline: 14px;
+    letter-spacing: 0.08em;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cluster[data-visible='true'] {
+    transition-duration: var(--duration-fast);
+  }
+
+  .button:active {
+    transform: none;
+  }
+}

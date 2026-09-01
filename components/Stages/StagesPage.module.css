@@ -1,0 +1,223 @@
+.page { overflow: clip; }
+.heroTitleGroup, .heroTitleFront { width: min(82vw, 100rem); }
+.heroFrontEs { filter: drop-shadow(-6px 8px 7px rgb(0 0 0 / 24%)); }
+.heroModel { inset: -2% 18% 2% 26%; }
+.heroCanvas { filter: drop-shadow(-18px 28px 18px rgb(0 0 0 / 58%)); }
+.planningLayout {
+  display: grid;
+  grid-template-columns: 64px minmax(0, 1200px);
+  justify-content: center;
+  gap: 24px;
+  margin-top: var(--home-group-gap);
+  transform: translateX(-44px);
+}
+.planningRail { position: sticky; top: calc(50svh - 96px); z-index: 8; height: max-content; display: grid; justify-items: center; gap: 14px; }
+.planningRail a { width: 42px; height: 42px; display: grid; place-items: center; border: 1px solid transparent; border-radius: 50%; color: var(--color-text-muted); transition: color var(--duration-fast) var(--ease-primary), background var(--duration-fast) var(--ease-primary), transform var(--duration-fast) var(--ease-primary); }
+.planningRail a:hover, .planningRail a:focus-visible { color: var(--color-text); transform: translateY(-2px); }
+.planningRail .planningRailActive { width: 54px; height: 54px; border-color: var(--color-line); background: var(--color-surface-raised); color: var(--color-blue); }
+.planningRail svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.projectSections {
+  display: grid;
+  gap: var(--home-heading-content-gap);
+  min-width: 0;
+}
+.projectSection { min-width: 0; scroll-margin-top: clamp(5rem, 10svh, 7rem); }
+.projectSection .projectHeading { margin: 0; }
+.projectSection:first-child .craftsmanPractice { margin-top: 0; }
+.projectLead { min-height: 2em; margin: var(--home-group-gap) auto 0; color: var(--color-text); font-size: clamp(1rem, 1.65vw, 1.5rem); font-weight: 700; letter-spacing: .04em; line-height: 2; text-align: center; }
+.projectInterface { width: 100%; min-height: clamp(24rem, 50vw, 42rem); margin-top: var(--home-group-gap); overflow: hidden; border: 1px solid var(--color-line); border-radius: clamp(18px, 2vw, 30px); background: var(--color-bg); }
+.craftsmanPractice { --craftsman-stage-height: clamp(27rem, 40vw, 33.75rem); min-height: calc(var(--craftsman-stage-height) + 210svh); margin-top: var(--home-group-gap); }
+.habitatPractice { min-height: calc(var(--craftsman-stage-height) + 140svh); }
+.craftsmanSticky { position: sticky; top: max(7rem, calc((100svh - var(--craftsman-stage-height)) / 2)); display: grid; grid-template-columns: minmax(15rem, 18.75rem) minmax(0, 1fr); gap: clamp(12px, 1.35vw, 22px); width: 100%; height: var(--craftsman-stage-height); }
+.craftsmanFeatureCard, .craftsmanBoard { overflow: hidden; border: 1px solid var(--color-line); background: var(--color-surface); }
+.craftsmanFeatureCard { --craftsman-outer-radius: clamp(22px, 2.3vw, 32px); container-type: inline-size; display: grid; grid-template-rows: auto minmax(0, 1fr); padding: 16px; border-radius: var(--craftsman-outer-radius); }
+.craftsmanFeatureStage { height: clamp(16rem, 21vw, 17rem); align-self: start; overflow: hidden; border: 1px solid var(--color-line); border-radius: max(14px, calc(var(--craftsman-outer-radius) - 7px)); background: var(--color-bg); }
+.craftsmanFeatureCopy { min-height: 0; display: flex; flex-direction: column; margin: clamp(26px, 2.4vw, 34px) 14px 0; padding: 14px 0 18px; }
+.craftsmanFeatureCopy h4 { width: 100%; margin: 0; color: var(--color-blue); font-family: var(--font-latin); font-size: clamp(1.5rem, 2.1vw, 1.75rem); font-weight: 700; line-height: 1.02; letter-spacing: 0; }
+.craftsmanFeatureCopy h4 span { display: block; transform: translateY(-10px); }
+.craftsmanFeatureCopy h4::after { width: min(40px, 35%); height: 2px; display: block; margin: 16px 0; background: var(--color-blue); content: ''; }
+.craftsmanFeatureCopy p { margin: auto 0 0; color: var(--color-text-muted); font-size: .76rem; font-weight: 500; line-height: 1.55; letter-spacing: .04em; }
+.craftsmanContentList { height: 100%; display: grid; align-content: center; gap: 10px; margin: 0; padding: clamp(12px, 1.2vw, 18px); list-style: none; }
+.craftsmanContentItem { min-height: 44px; display: flex; align-items: center; gap: 10px; padding: 0 12px; border: 1px solid transparent; border-radius: 9px; color: var(--color-text-muted); background: var(--color-surface-raised); transition: color var(--duration-fast) var(--ease-primary), border-color var(--duration-fast) var(--ease-primary), background var(--duration-fast) var(--ease-primary); }
+.craftsmanContentItem[data-active='true'] { border-color: color-mix(in srgb, var(--color-blue) 46%, var(--color-line)); color: var(--color-text); background: color-mix(in srgb, var(--color-blue) 9%, var(--color-surface-raised)); }
+.craftsmanContentItem:has(button:hover) { border-color: color-mix(in srgb, var(--color-blue) 34%, var(--color-line)); color: var(--color-text); }
+.craftsmanContentItem button { width: 100%; display: flex; align-items: center; gap: 10px; padding: 0; border: 0; color: inherit; background: transparent; text-align: left; cursor: pointer; }
+.craftsmanContentItem button:focus-visible { outline: 2px solid var(--color-blue); outline-offset: 5px; border-radius: 7px; }
+.craftsmanContentItem svg { width: 18px; height: 18px; flex: none; fill: none; stroke: var(--color-blue); stroke-width: 1.55; stroke-linecap: round; stroke-linejoin: round; }
+.craftsmanContentItem strong { min-width: 0; display: grid; gap: 2px; font-weight: 700; line-height: 1.15; }
+.craftsmanContentItem strong small { color: var(--color-text-muted); font-size: .76rem; font-weight: 400; transition: color var(--duration-fast) var(--ease-primary); }
+.craftsmanContentItem[data-active='true'] strong small { color: var(--color-blue); }
+.craftsmanBoardStack { position: relative; min-width: 0; height: 100%; overflow: visible; isolation: isolate; }
+.craftsmanBoard { --craftsman-board-inset: clamp(5px, .5vw, 8px); --craftsman-outer-radius: clamp(22px, 2.3vw, 32px); --craftsman-topbar-height: clamp(32px, 3.2vw, 42px); position: absolute; z-index: calc(2 + var(--stack-index, 0)); inset: 0; display: grid; place-items: center; border-radius: var(--craftsman-outer-radius); background: var(--color-surface); will-change: transform; }
+.craftsmanBoard[data-media='editorial'] { --craftsman-info-width: clamp(4.5rem, 10vw, 9rem); --craftsman-editorial-gap: var(--craftsman-board-inset); }
+.craftsmanBoardBase { z-index: 1; }
+.craftsmanBrowserBar { position: absolute; z-index: 3; top: 0; right: 0; left: 0; height: var(--craftsman-topbar-height); display: grid; grid-template-columns: minmax(0, 1fr) 40px; align-items: center; padding: 0 clamp(10px, 1vw, 14px); border-bottom: 1px solid var(--color-line); color: var(--color-text-muted); background: var(--color-surface); }
+.craftsmanTraffic { display: flex; align-items: center; gap: clamp(6px, .65vw, 9px); margin-left: clamp(5px, .6vw, 9px); }
+.craftsmanTraffic i { width: clamp(8px, .8vw, 12px); height: clamp(8px, .8vw, 12px); border-radius: 50%; background: #ff605c; }
+.craftsmanTraffic i:nth-child(2) { background: #ffbd44; }
+.craftsmanTraffic i:nth-child(3) { background: #63c74d; }
+.craftsmanBrowserPlus { width: clamp(26px, 2.8vw, 34px); height: clamp(26px, 2.8vw, 34px); display: grid; place-items: center; border-radius: 9px; }
+.craftsmanBrowserBar svg { width: clamp(14px, 1.4vw, 18px); height: clamp(14px, 1.4vw, 18px); fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.craftsmanBrowserPlus { justify-self: end; }
+.craftsmanVideoFrame, .craftsmanOverviewFrame { position: relative; width: calc(100% - var(--craftsman-board-inset) * 2); max-height: calc(100% - var(--craftsman-topbar-height) - var(--craftsman-board-inset) * 2); align-self: start; margin-top: calc(var(--craftsman-topbar-height) + var(--craftsman-board-inset)); aspect-ratio: 16 / 9; overflow: hidden; border: 1px solid var(--color-line); border-radius: max(14px, calc(var(--craftsman-outer-radius) - var(--craftsman-board-inset))); background: #050505; }
+.craftsmanVideoFrame video, .craftsmanOverviewFrame picture, .craftsmanOverviewFrame img { display: block; width: 100%; height: 100%; }
+.craftsmanVideoFrame video { object-fit: cover; background: #000; }
+.craftsmanOverviewFrame img { object-fit: cover; }
+.craftsmanVideoPoster { position: relative; width: 100%; height: 100%; display: grid; place-items: center; overflow: hidden; padding: 0; border: 0; color: #686868; background: #050505; cursor: pointer; }
+.craftsmanVideoPoster::after { position: absolute; z-index: 0; inset: 0; background: rgb(0 0 0 / 8%); content: ''; }
+.craftsmanVideoPosterImage { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.craftsmanVideoPoster > span { position: relative; z-index: 1; }
+.craftsmanPlayButton { width: clamp(48px, 4.6vw, 62px); height: clamp(48px, 4.6vw, 62px); display: grid; place-items: center; border: 1px solid #787878; border-radius: 50%; background: transparent; transition: color var(--duration-fast) var(--ease-primary), border-color var(--duration-fast) var(--ease-primary), background var(--duration-fast) var(--ease-primary), transform var(--duration-fast) var(--ease-primary); }
+.craftsmanPlayButton svg { width: 60%; height: 60%; fill: currentColor; }
+.craftsmanVideoPoster:hover .craftsmanPlayButton, .craftsmanVideoPoster:focus-visible .craftsmanPlayButton { color: #000; border-color: var(--color-pink); background: var(--color-pink); transform: scale(1.06); }
+.craftsmanEditorialLayout { box-sizing: border-box; min-height: 0; display: grid; grid-template-columns: minmax(0, 1fr) var(--craftsman-info-width); grid-template-rows: minmax(0, 1fr); gap: var(--craftsman-editorial-gap); width: 100%; height: calc(100% - var(--craftsman-topbar-height)); align-self: start; margin-top: var(--craftsman-topbar-height); overflow: hidden; padding: var(--craftsman-board-inset); }
+.craftsmanEditorialImage, .craftsmanEditorialCopy { overflow: hidden; border: 1px solid var(--color-line); border-radius: max(14px, calc(var(--craftsman-outer-radius) - var(--craftsman-board-inset))); background: #050505; }
+.craftsmanEditorialImage { min-height: 0; width: 100%; max-height: 100%; display: grid; place-items: center; aspect-ratio: 3508 / 2480; align-self: start; }
+.craftsmanEditorialImage picture, .craftsmanEditorialImage img { display: block; width: 100%; height: 100%; }
+.craftsmanEditorialImage img { object-fit: contain; }
+.craftsmanEditorialCopy { position: relative; container-type: inline-size; height: var(--craftsman-editorial-media-height, 100%); display: flex; flex-direction: column; justify-content: space-between; align-self: start; padding: clamp(10px, 1.15vw, 18px); padding-bottom: calc(clamp(10px, 1.15vw, 18px) + 8px); color: var(--color-text); background: var(--color-bg); }
+.craftsmanEditorialCopy { overflow: hidden; border: 0; border-left: 1px solid var(--color-line); border-radius: 0; background: transparent; }
+.craftsmanEditorialCopy header { display: grid; gap: 0; }
+.craftsmanEditorialCopy h3, .craftsmanEditorialCopy h4, .craftsmanEditorialCopy p { margin: 0; }
+.craftsmanEditorialCopy h3 { color: var(--color-blue); font-family: var(--font-latin); font-size: 1.75rem; font-weight: 750; line-height: .95; letter-spacing: -.045em; }
+.craftsmanEditorialCopy h3 span { display: block; }
+.craftsmanEditorialCopy h3::after { width: min(40px, 35%); height: 2px; display: block; margin: 16px 0; background: var(--color-blue); content: ''; }
+.craftsmanEditorialCopy h4 { font-size: clamp(.68rem, 11cqw, 1rem); font-weight: 700; line-height: 1.15; }
+.craftsmanEditorialCopy p { color: var(--color-text-muted); font-size: .76rem; font-weight: 500; line-height: 1.55; letter-spacing: .04em; overflow-wrap: anywhere; }
+.craftsmanEditorialCopy em { color: var(--color-text); font-family: var(--font-latin); font-style: normal; font-weight: 650; }
+.lightStudioPractice { --craftsman-stage-height: clamp(27rem, 40vw, 33.75rem); }
+.lightStudioPractice .craftsmanSticky { grid-template-columns: minmax(15rem, 16.4rem) minmax(0, 1fr); }
+.lightStudioPage { position: relative; background: #050505; }
+.lightStudioPage picture { position: absolute; inset: 1px; display: block; overflow: hidden; border-radius: max(13px, calc(var(--craftsman-outer-radius) - var(--craftsman-board-inset) - 1px)); }
+.lightStudioPage img { display: block; width: 100%; height: 100%; }
+.lightStudioPage img { object-fit: contain; background: #050505; }
+.lightStudioPractice .craftsmanEditorialImage { width: auto; height: 100%; max-height: 100%; aspect-ratio: 1; align-self: stretch; justify-self: start; }
+.lightStudioPractice { min-height: calc(var(--craftsman-stage-height) + 420svh); }
+.lightStudioPractice .craftsmanVideoPoster picture,
+.lightStudioPractice .craftsmanVideoPoster img { position: absolute; inset: 0; width: 100%; height: 100%; }
+.lightStudioPractice .craftsmanVideoPoster img { object-fit: cover; }
+.lightStudioPractice .craftsmanVideoPoster video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.lightStudioMediaStage { --light-studio-fixed-width: calc(var(--craftsman-stage-height) * .44); --light-studio-fixed-gap: clamp(8px, .9vw, 14px); position: relative; min-width: 0; height: 100%; }
+.lightStudioMediaStage .craftsmanBoardStack { width: 100%; }
+.lightStudioPractice .craftsmanBoard[data-media='editorial'] { right: calc(var(--light-studio-fixed-width) + var(--light-studio-fixed-gap)); }
+.lightStudioFixedVisual { --craftsman-board-inset: clamp(5px, .5vw, 8px); --craftsman-outer-radius: clamp(22px, 2.3vw, 32px); --craftsman-topbar-height: clamp(32px, 3.2vw, 42px); position: absolute; z-index: 12; top: 0; right: 0; width: var(--light-studio-fixed-width); height: 100%; overflow: hidden; border: 1px solid var(--color-line); border-radius: var(--craftsman-outer-radius); background: var(--color-surface); will-change: transform; }
+.lightStudioFixedConcept { z-index: 12; }
+.lightStudioFixedStructure { z-index: 13; }
+.lightStudioFixedFrame { position: absolute; inset: calc(var(--craftsman-topbar-height) + var(--craftsman-board-inset)) var(--craftsman-board-inset) var(--craftsman-board-inset); display: grid; place-items: center; overflow: hidden; border: 1px solid var(--color-line); border-radius: max(14px, calc(var(--craftsman-outer-radius) - var(--craftsman-board-inset))); background: #050505; }
+.lightStudioFixedFrame picture, .lightStudioFixedFrame img { display: block; width: 100%; height: 100%; }
+.lightStudioFixedFrame img { object-fit: contain; background: #050505; }
+.lightStudioFixedConcept .lightStudioFixedFrame,
+.lightStudioFixedConcept .lightStudioFixedFrame img { background: #fff; }
+
+@media (min-width: 601px) {
+  .lightStudioPractice .craftsmanEditorialLayout { grid-template-columns: minmax(5.75rem, 1fr) auto; }
+  .lightStudioPractice .craftsmanEditorialCopy { grid-column: 1; grid-row: 1; border-right: 1px solid var(--color-line); border-left: 0; }
+  .lightStudioPractice .craftsmanEditorialImage { grid-column: 2; grid-row: 1; justify-self: end; }
+}
+
+@media (max-width: 1399px) and (min-width: 768px) {
+  .planningLayout { grid-template-columns: 54px minmax(0, 1fr); gap: 16px; width: 100%; transform: none; }
+}
+
+@media (min-width: 1101px) and (max-width: 1450px) {
+  .craftsmanBoard[data-media='editorial'] { --craftsman-info-width: clamp(8.5rem, 12vw, 10rem); }
+  .craftsmanFeatureStage { height: clamp(15rem, 18vw, 15.5rem); }
+  .craftsmanFeatureCopy { margin-top: clamp(16px, 1.6vw, 22px); padding-top: 10px; padding-bottom: 12px; }
+  .craftsmanFeatureCopy p { line-height: 1.45; }
+}
+
+@media (min-width: 1181px) and (max-width: 1320px) {
+  .lightStudioMediaStage { --light-studio-fixed-width: clamp(8.5rem, 15vw, calc(var(--craftsman-stage-height) * .34)); }
+}
+
+@media (min-width: 1101px) and (max-width: 1180px) {
+  .lightStudioMediaStage { --light-studio-fixed-width: 0px; --light-studio-fixed-gap: 0px; }
+  .lightStudioPractice .craftsmanBoard[data-media='editorial'] { right: 0; }
+  .lightStudioFixedVisual { display: none; }
+}
+
+@media (max-width: 1100px) {
+  .craftsmanPractice { min-height: auto; }
+  .craftsmanSticky { position: relative; top: auto; grid-template-columns: 1fr; height: auto; }
+  .lightStudioPractice .craftsmanSticky { grid-template-columns: 1fr; }
+  .craftsmanFeatureCard { height: auto; grid-template-rows: auto auto; padding: 8px 8px 18px; }
+  .craftsmanFeatureCopy { margin-top: 14px; }
+  .craftsmanBoardStack { height: auto; display: grid; gap: 14px; margin-top: 14px; }
+  .craftsmanBoard { position: relative; inset: auto; height: auto; min-height: 0; transform: none !important; }
+  .craftsmanBoard[data-media='wide'], .craftsmanBoard[data-media='editorial'] { aspect-ratio: 16 / 11; }
+  .craftsmanVideoFrame, .craftsmanOverviewFrame { height: auto; max-height: none; }
+  .craftsmanBoard[data-media='editorial'] { --craftsman-info-width: clamp(7.5rem, 18vw, 9rem); }
+  .lightStudioMediaStage { height: auto; }
+  .lightStudioPractice .craftsmanBoard[data-media='editorial'] { right: auto; }
+  .lightStudioFixedVisual { display: none; }
+}
+
+@media (max-width: 991px) {
+  .heroModel { inset: 1% 4% 8% 18%; }
+  .projectInterface { min-height: clamp(21rem, 68vw, 34rem); }
+  .craftsmanPractice { min-height: auto; }
+  .craftsmanSticky { position: relative; top: auto; grid-template-columns: 1fr; height: auto; }
+  .craftsmanFeatureCard { height: auto; grid-template-rows: auto auto; padding: 8px 8px 18px; }
+  .craftsmanFeatureCopy { margin-top: 14px; }
+  .craftsmanBoardStack { height: auto; display: grid; gap: 14px; margin-top: 14px; }
+  .craftsmanBoard { position: relative; inset: auto; height: auto; min-height: 0; transform: none !important; }
+  .craftsmanBoard[data-media='wide'], .craftsmanBoard[data-media='editorial'] { aspect-ratio: 16 / 11; }
+  .craftsmanVideoFrame, .craftsmanOverviewFrame { height: auto; max-height: none; }
+  .craftsmanBoard[data-media='editorial'] { --craftsman-info-width: clamp(4.5rem, 22vw, 8rem); }
+}
+@media (max-width: 767px) {
+  .heroTitleGroup, .heroTitleFront { top: 39%; width: 96vw; }
+  .heroModel { inset: -3% -10% 17% 2%; }
+  .heroCanvas { filter: drop-shadow(-9px 14px 10px rgb(0 0 0 / 50%)); }
+  .planningLayout { display: block; transform: none; }
+  .planningRail { top: 5.25rem; grid-template-columns: repeat(3, 1fr); gap: 8px; width: min(100%, 12rem); margin: 0 auto var(--home-heading-content-gap); padding: 6px; border: 1px solid var(--color-line); border-radius: 999px; background: rgb(0 0 0 / 72%); backdrop-filter: blur(12px); transform: translateZ(0); }
+  .planningRail a, .planningRail .planningRailActive { width: 42px; height: 42px; }
+  .projectLead { text-align: left; }
+  .projectInterface { min-height: 72vw; border-radius: 18px; }
+  .craftsmanFeatureCard { --craftsman-outer-radius: 18px; height: auto; }
+  .craftsmanBoard { --craftsman-outer-radius: 18px; height: auto; }
+  .craftsmanBoard { --craftsman-board-inset: 4px; }
+  .craftsmanBoard[data-media='editorial'] { --craftsman-editorial-gap: var(--craftsman-board-inset); }
+}
+
+@media (max-width: 600px) {
+  .craftsmanBoard[data-media='editorial'] { aspect-ratio: auto; }
+  .craftsmanBoard[data-media='editorial'] .craftsmanEditorialLayout {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto auto;
+    height: auto;
+  }
+  .craftsmanBoard[data-media='editorial'] .craftsmanEditorialImage {
+    width: 100%;
+    height: auto;
+    max-height: none;
+    aspect-ratio: 3508 / 2480;
+  }
+  .craftsmanBoard[data-media='editorial'] .craftsmanEditorialCopy {
+    height: auto;
+    min-height: 0;
+    gap: 28px;
+    overflow: visible;
+    padding: 18px 14px 20px;
+    border: 0;
+    border-top: 1px solid var(--color-line);
+  }
+  .craftsmanBoard[data-media='editorial'] .craftsmanEditorialCopy h3 {
+    font-size: 1.5rem;
+    line-height: 1;
+    white-space: nowrap;
+  }
+  .craftsmanBoard[data-media='editorial'] .craftsmanEditorialCopy h3 span { display: inline; }
+  .craftsmanBoard[data-media='editorial'] .craftsmanEditorialCopy h3 span + span::before { content: ' '; }
+  .craftsmanBoard[data-media='editorial'] .craftsmanEditorialCopy h4 {
+    font-size: .85rem;
+  }
+  .craftsmanBoard[data-media='editorial'] .craftsmanEditorialCopy p {
+    font-size: .76rem;
+    line-height: 1.55;
+  }
+  .lightStudioPractice .craftsmanBoard[data-media='editorial'] .craftsmanEditorialImage {
+    height: auto;
+    aspect-ratio: 1;
+  }
+}

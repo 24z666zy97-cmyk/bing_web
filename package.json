@@ -1,0 +1,28 @@
+{
+  "name": "zhang-yubing-site",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "check:bundle": "node scripts/check-bundle.mjs",
+    "fonts:subset": "python scripts/subset-fonts.py",
+    "items:measure": "python scripts/measure-items.py"
+  },
+  "dependencies": {
+    "gsap": "^3.15.0",
+    "next": "15.5.4",
+    "react": "19.1.1",
+    "react-dom": "19.1.1",
+    "three": "^0.183.2"
+  },
+  "devDependencies": {
+    "@types/node": "22.18.1",
+    "@types/react": "19.1.13",
+    "@types/react-dom": "19.1.9",
+    "@types/three": "^0.183.1",
+    "typescript": "5.9.2"
+  }
+}

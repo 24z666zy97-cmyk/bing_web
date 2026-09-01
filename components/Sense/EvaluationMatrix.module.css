@@ -1,0 +1,235 @@
+.matrixCard {
+  width: min(100%, 1200px);
+  margin: clamp(2.5rem, 5vw, 4.5rem) auto 0;
+  padding: clamp(.75rem, 1.5vw, 1.15rem);
+  border: 1px solid var(--color-line);
+  border-radius: 32px;
+  background: var(--color-surface);
+}
+
+.scrollFrame {
+  overflow-x: auto;
+  border: 1px solid var(--color-line);
+  border-radius: clamp(18px, 1.8vw, 24px);
+  background: var(--color-bg);
+  scrollbar-color: var(--color-text-muted) transparent;
+  scrollbar-width: thin;
+}
+
+.scrollFrame:focus-visible {
+  outline: 2px solid var(--color-blue);
+  outline-offset: 3px;
+}
+
+.matrixTable {
+  width: 100%;
+  min-width: 820px;
+  border-collapse: separate;
+  border-spacing: 0;
+  table-layout: fixed;
+  color: var(--color-text-muted);
+  font-size: clamp(.7rem, .78vw, .8rem);
+  line-height: 1.55;
+}
+
+.matrixTable th,
+.matrixTable td {
+  padding: clamp(.8rem, 1.3vw, 1.15rem) clamp(.62rem, 1vw, .9rem);
+  border-bottom: 1px solid var(--color-line);
+  vertical-align: middle;
+}
+
+.matrixTable thead th {
+  height: 72px;
+  color: var(--color-text);
+  font-weight: 750;
+  text-align: center;
+}
+
+.matrixTable thead th:first-child,
+.matrixTable tbody th {
+  width: clamp(62px, 6vw, 80px);
+  padding-left: clamp(.7rem, 1.2vw, 1.2rem);
+  text-align: left;
+}
+
+.matrixTable thead th:nth-child(n + 2):nth-child(-n + 7) {
+  width: clamp(58px, 6.2vw, 82px);
+}
+
+.matrixTable thead th:nth-child(8) { width: clamp(120px, 12.5vw, 164px); }
+.matrixTable thead th:nth-child(9) { width: clamp(138px, 14.5vw, 190px); }
+.matrixTable thead th:nth-child(10) { width: clamp(110px, 11vw, 142px); }
+
+.matrixTable thead span,
+.matrixTable thead small {
+  display: block;
+}
+
+.matrixTable thead small {
+  margin-top: .22rem;
+  color: var(--color-text-muted);
+  font-size: .68rem;
+  font-weight: 600;
+}
+
+.matrixTable tbody th {
+  color: var(--color-text);
+  font-size: .84rem;
+  font-weight: 750;
+  white-space: nowrap;
+}
+
+.matrixTable tbody tr:last-child > * {
+  border-bottom: 0;
+}
+
+.score {
+  color: var(--color-text-muted);
+  font-size: .9rem;
+  font-weight: 750;
+  text-align: center;
+}
+
+.copyCell {
+  color: var(--color-text);
+  text-align: left;
+}
+
+.directionHeader,
+.direction {
+  color: var(--color-pink) !important;
+  font-weight: 750;
+  text-align: center;
+}
+
+.direction span {
+  display: block;
+}
+
+.legend {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: clamp(.75rem, 2vw, 2rem);
+  min-height: 68px;
+  padding: .8rem .4rem 0;
+  color: var(--color-text-muted);
+  font-size: .72rem;
+}
+
+.scaleGroup {
+  display: flex;
+  align-items: center;
+  gap: clamp(.32rem, .65vw, .6rem);
+  min-width: max-content;
+}
+
+.scaleGroup strong {
+  color: var(--color-text);
+  white-space: nowrap;
+}
+
+.scaleGroup span {
+  display: flex;
+  gap: .42rem;
+  white-space: nowrap;
+}
+
+.scaleGroup span + span::before {
+  color: var(--color-text-muted);
+  content: '/';
+}
+
+.scaleGroup b {
+  color: var(--color-pink);
+}
+
+.legend p {
+  margin: 0;
+  text-align: right;
+}
+
+@media (max-width: 1100px) {
+  .matrixTable th,
+  .matrixTable td {
+    padding-inline: clamp(.42rem, .8vw, .7rem);
+  }
+
+  .legend {
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    gap: .55rem;
+  }
+
+  .legend p {
+    flex-basis: 100%;
+    margin: .15rem 0 0;
+    text-align: left;
+  }
+}
+
+@media (max-width: 767px) {
+  .matrixCard {
+    width: 100%;
+    margin-top: 2rem;
+    padding: .5rem;
+    border-radius: 32px;
+  }
+
+  .scrollFrame {
+    border-radius: 17px;
+    overscroll-behavior-inline: contain;
+  }
+
+  .matrixTable {
+    min-width: 820px;
+  }
+
+  .matrixTable thead th:first-child,
+  .matrixTable tbody th {
+    position: sticky;
+    left: 0;
+    z-index: 2;
+    background: var(--color-bg);
+    box-shadow: 10px 0 16px rgb(0 0 0 / 24%);
+  }
+
+  .matrixTable thead th:last-child,
+  .matrixTable tbody td:last-child {
+    position: sticky;
+    right: 0;
+    z-index: 2;
+    background: var(--color-bg);
+    box-shadow: -10px 0 16px rgb(0 0 0 / 24%);
+  }
+
+  .matrixTable thead th {
+    z-index: 3 !important;
+  }
+
+  .legend {
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    gap: .55rem;
+    padding: 1rem .55rem .5rem;
+  }
+
+  .legend p {
+    flex-basis: 100%;
+    margin: .15rem 0 0;
+    text-align: left;
+  }
+
+  .scaleGroup {
+    width: 100%;
+    min-width: 0;
+    flex-wrap: wrap;
+    column-gap: .75rem;
+    row-gap: .5rem;
+  }
+
+  .scaleGroup strong {
+    flex: 0 0 100%;
+  }
+}
