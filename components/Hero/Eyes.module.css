@@ -20,6 +20,14 @@
 
 .frame[data-active='true'] {
   opacity: 1;
+  z-index: 1;
+}
+
+/* Hard swap, not a crossfade: keep the last frame beneath the incoming one
+   until the post-commit rendering handoff completes. */
+.frame[data-incoming='true'] {
+  opacity: 1;
+  z-index: 2;
 }
 
 .slice {

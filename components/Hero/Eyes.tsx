@@ -58,9 +58,10 @@ interface EyesProps {
 
 type ReadyFrame = { image: HTMLImageElement; fail: () => void };
 
-function EyeFrame({ dir, active, onReady }: {
+function EyeFrame({ dir, active, incoming, onReady }: {
   dir: Direction;
   active: boolean;
+  incoming: boolean;
   onReady: (dir: Direction, frame: ReadyFrame | null) => void;
 }) {
   const imageRef = useRef<HTMLImageElement>(null);
@@ -109,7 +110,7 @@ function EyeFrame({ dir, active, onReady }: {
   }, [dir, fallback, onReady]);
 
   return (
-    <picture className={styles.frame} data-active={active}>
+    <picture className={styles.frame} data-active={active} data-incoming={incoming}>
       {!fallback && (
         <source type="image/avif" srcSet={`/profile/avatar/eye-${dir}.avif`} />
       )}
@@ -131,6 +132,11 @@ function EyeFrame({ dir, active, onReady }: {
 
 export default function Eyes({ progress, onPrepared }: EyesProps) {
   const [activeDir, setActiveDir] = useState<Direction | null>(null);
+  const activeDirRef = useRef<Direction | null>(null);
+  const [incoming, setIncoming] = useState<{
+    dir: Direction; version: number; frame: ReadyFrame;
+  } | null>(null);
+  const inFlightDir = useRef<Direction | null>(null);
   const hostRef = useRef<HTMLDivElement>(null);
   const readyFrames = useRef(new Map<Direction, ReadyFrame>());
   const requestedDir = useRef<Direction>(DEFAULT_DIR);
@@ -139,25 +145,73 @@ export default function Eyes({ progress, onPrepared }: EyesProps) {
 
   const requestDirection = useCallback((dir: Direction) => {
     requestedDir.current = dir;
+    // Pointer events in the same sector must not restart the paint handoff.
+    if (inFlightDir.current === dir) return;
     const version = ++requestVersion.current;
+    inFlightDir.current = null;
+    setIncoming(null);
+    if (document.hidden || activeDirRef.current === dir) return;
     const frame = readyFrames.current.get(dir);
     if (!frame) return; // Keep the last successfully displayed direction.
+    inFlightDir.current = dir;
     // Decode the actual displayed node, not a detached preloader. Recheck on
     // each request, and never let a slow earlier request override a later one.
     void frame.image.decode().then(() => {
       if (version !== requestVersion.current || readyFrames.current.get(dir) !== frame) return;
-      if (frame.image.naturalWidth > 0) setActiveDir(dir);
-    }).catch(frame.fail);
+      if (!document.hidden && frame.image.naturalWidth > 0) {
+        setIncoming({ dir, version, frame });
+      } else {
+        inFlightDir.current = null;
+      }
+    }).catch(() => {
+      if (version !== requestVersion.current || readyFrames.current.get(dir) !== frame) return;
+      inFlightDir.current = null;
+      frame.fail();
+    });
   }, []);
+
+  useEffect(() => {
+    if (!incoming) return;
+    let first = 0;
+    let second = 0;
+    // This effect runs after React has made the incoming layer visible ABOVE
+    // the old one. Allow a rendering opportunity before hiding the old layer.
+    // rAF is not proof of GPU presentation; the background-return case still
+    // needs visual verification on the affected browser.
+    first = requestAnimationFrame(() => {
+      second = requestAnimationFrame(() => {
+        if (document.hidden || incoming.version !== requestVersion.current ||
+            readyFrames.current.get(incoming.dir) !== incoming.frame) return;
+        if (incoming.frame.image.complete && incoming.frame.image.naturalWidth > 0) {
+          activeDirRef.current = incoming.dir;
+          setActiveDir(incoming.dir);
+        }
+        inFlightDir.current = null;
+        setIncoming(null);
+      });
+    });
+    return () => {
+      cancelAnimationFrame(first);
+      cancelAnimationFrame(second);
+    };
+  }, [incoming]);
 
   const markFrameReady = useCallback((dir: Direction, frame: ReadyFrame | null) => {
     if (!frame) {
       readyFrames.current.delete(dir);
+      if (inFlightDir.current === dir) {
+        ++requestVersion.current;
+        inFlightDir.current = null;
+        setIncoming(null);
+      }
       return;
     }
     readyFrames.current.set(dir, frame);
     // A decoded frame can fill the sockets while the preferred one is pending.
-    setActiveDir((current) => current ?? dir);
+    if (activeDirRef.current === null) {
+      activeDirRef.current = dir;
+      setActiveDir(dir);
+    }
     if (requestedDir.current === dir) requestDirection(dir);
     if (readyFrames.current.size === ALL_DIRECTIONS.length) setPrepared(true);
   }, [requestDirection]);
@@ -166,7 +220,29 @@ export default function Eyes({ progress, onPrepared }: EyesProps) {
     if (prepared) onPrepared();
   }, [prepared, onPrepared]);
 
-  useEffect(() => () => { ++requestVersion.current; }, []);
+  useEffect(() => {
+    const suspend = () => {
+      ++requestVersion.current;
+      inFlightDir.current = null;
+      setIncoming(null);
+      // Keep the committed layer visible. Never finish a pre-background swap.
+    };
+    const resume = () => {
+      if (!document.hidden) requestDirection(requestedDir.current);
+    };
+    const onVisibilityChange = () => document.hidden ? suspend() : resume();
+    document.addEventListener('visibilitychange', onVisibilityChange);
+    window.addEventListener('pagehide', suspend);
+    window.addEventListener('pageshow', resume);
+    window.addEventListener('focus', resume);
+    return () => {
+      ++requestVersion.current;
+      document.removeEventListener('visibilitychange', onVisibilityChange);
+      window.removeEventListener('pagehide', suspend);
+      window.removeEventListener('pageshow', resume);
+      window.removeEventListener('focus', resume);
+    };
+  }, [requestDirection]);
 
   useEffect(() => {
     if (progress >= 1) {
@@ -303,6 +379,7 @@ export default function Eyes({ progress, onPrepared }: EyesProps) {
           key={dir}
           dir={dir}
           active={activeDir === dir}
+          incoming={incoming?.dir === dir}
           onReady={markFrameReady}
         />
       ))}
