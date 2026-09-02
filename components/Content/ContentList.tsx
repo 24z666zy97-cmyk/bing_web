@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { type MouseEvent, useState } from 'react';
+import { type PointerEvent, useState } from 'react';
 import { SECTIONS } from '@/lib/sections';
 import styles from './ContentList.module.css';
 
@@ -13,22 +13,18 @@ interface ContentListProps {
 }
 
 export default function ContentList({ excludeHref, onNavigate }: ContentListProps) {
-  /* 触摸设备没有 hover，用首次触摸点亮激活态，第二次才跳转会很别扭；
-   * 这里只记录触摸位置让样式跟上，不拦截跳转本身。 */
+  /* 触摸按下时立即点亮中文激活态，同时保留 Link 的单击直达行为。
+   * 如果手势被浏览器识别为滚动并取消点击，则撤销临时激活态。 */
   const [touched, setTouched] = useState<string | null>(null);
 
   const rows = excludeHref ? SECTIONS.filter((s) => s.href !== excludeHref) : SECTIONS;
 
-  const handleClick = (event: MouseEvent<HTMLAnchorElement>, href: string) => {
-    const usesTapInteraction = window.matchMedia('(hover: none), (pointer: coarse)').matches;
+  const handlePointerDown = (event: PointerEvent<HTMLAnchorElement>, href: string) => {
+    if (event.pointerType !== 'mouse') setTouched(href);
+  };
 
-    if (usesTapInteraction && touched !== href) {
-      event.preventDefault();
-      setTouched(href);
-      return;
-    }
-
-    onNavigate?.();
+  const handlePointerCancel = (event: PointerEvent<HTMLAnchorElement>) => {
+    if (event.pointerType !== 'mouse') setTouched(null);
   };
 
   return (
@@ -40,7 +36,9 @@ export default function ContentList({ excludeHref, onNavigate }: ContentListProp
           className={styles.row}
           data-section-num={section.num}
           data-active={touched === section.href ? 'true' : undefined}
-          onClick={(event) => handleClick(event, section.href)}
+          onPointerDown={(event) => handlePointerDown(event, section.href)}
+          onPointerCancel={handlePointerCancel}
+          onClick={onNavigate}
         >
           <span className={styles.num} aria-hidden="true">
             {section.num}

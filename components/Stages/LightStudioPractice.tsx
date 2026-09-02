@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import { MobileCardCarouselControls, useMobileCardCarousel } from '@/components/MobileCardCarousel';
 import { BrowserBar, ContentItem, PlayIcon } from './CraftsmanPathPractice';
 import styles from './StagesPage.module.css';
 
@@ -54,6 +55,9 @@ export default function LightStudioPractice() {
   const [activePanel, setActivePanel] = useState(0);
   const [mobileLayout, setMobileLayout] = useState(false);
   const [videoRequested, setVideoRequested] = useState(false);
+  const [mediaPlaying, setMediaPlaying] = useState(false);
+  const carousel = useMobileCardCarousel(PANEL_COUNT + 1, rootRef, mediaPlaying);
+  const displayedPanel = carousel.enabled ? carousel.index : activePanel;
 
   useEffect(() => {
     const query = window.matchMedia('(max-width: 1100px)');
@@ -104,7 +108,7 @@ export default function LightStudioPractice() {
     return () => window.removeEventListener('scroll', update);
   }, [mobileLayout]);
 
-  useEffect(() => { if (activePanel !== 0) videoRef.current?.pause(); }, [activePanel]);
+  useEffect(() => { if (displayedPanel !== 0) videoRef.current?.pause(); }, [displayedPanel]);
 
   const requestVideo = () => {
     setVideoRequested(true);
@@ -114,6 +118,10 @@ export default function LightStudioPractice() {
   const selectPanel = (index: number) => {
     const root = rootRef.current;
     if (!root) return;
+    if (carousel.enabled) {
+      carousel.select(index);
+      return;
+    }
     if (mobileLayout) {
       root.querySelector<HTMLElement>(`[data-panel-index="${index}"]`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
       return;
@@ -123,7 +131,7 @@ export default function LightStudioPractice() {
     window.scrollTo({ top: rootTop + travel * (index / PANEL_COUNT), behavior: 'smooth' });
   };
 
-  const group = activePanel === 0 ? 0 : activePanel <= 2 ? 1 : activePanel <= 4 ? 2 : 3;
+  const group = displayedPanel === 0 ? 0 : displayedPanel <= 2 ? 1 : displayedPanel <= 4 ? 2 : 3;
   const conceptIndependentEntry = Math.min(1, Math.max(0, progress * PANEL_COUNT));
   const structureIndependentEntry = Math.min(1, Math.max(0, progress * PANEL_COUNT - 2));
   const conceptIndependentTransform = `translate3d(0, ${(1 - conceptIndependentEntry) * entryDistance}px, 0)`;
@@ -148,11 +156,11 @@ export default function LightStudioPractice() {
         </div>
       </aside>
       <div className={styles.lightStudioMediaStage}>
-      <div className={styles.craftsmanBoardStack} aria-label="Light Studio 项目媒体">
-        <article className={`${styles.craftsmanBoard} ${styles.craftsmanBoardBase}`} data-media="wide" data-panel-index="0" style={{ opacity: videoOpacity, pointerEvents: videoOpacity < .01 ? 'none' : undefined }} aria-label="Light Studio 视频">
+      <div className={styles.craftsmanBoardStack} data-mobile-carousel={carousel.enabled || undefined} data-carousel-direction={carousel.direction ?? undefined} onPointerDown={carousel.onPointerDown} onPointerUp={carousel.onPointerUp} aria-label="Light Studio 项目媒体">
+        <article className={`${styles.craftsmanBoard} ${styles.craftsmanBoardBase}`} data-media="wide" data-panel-index="0" data-carousel-position={carousel.getPosition(0)} style={{ opacity: videoOpacity, pointerEvents: videoOpacity < .01 ? 'none' : undefined }} aria-label="Light Studio 视频">
           <BrowserBar />
           <div className={styles.craftsmanVideoFrame}>
-            {videoRequested ? <video ref={videoRef} src={`${MEDIA_ROOT}/light-studio.mp4`} controls playsInline preload="metadata" /> : <button className={styles.craftsmanVideoPoster} type="button" onClick={requestVideo} aria-label="播放 Light Studio 视频">
+            {videoRequested ? <video ref={videoRef} src={`${MEDIA_ROOT}/light-studio.mp4`} controls playsInline preload="metadata" onPlay={() => setMediaPlaying(true)} onPause={() => setMediaPlaying(false)} onEnded={() => setMediaPlaying(false)} /> : <button className={styles.craftsmanVideoPoster} type="button" onClick={requestVideo} aria-label="播放 Light Studio 视频">
               <video src={`${MEDIA_ROOT}/light-studio.mp4#t=0.01`} muted playsInline preload="auto" aria-hidden="true" />
               <span className={styles.craftsmanPlayButton}><PlayIcon /></span>
             </button>}
@@ -172,7 +180,7 @@ export default function LightStudioPractice() {
         </aside>
         {pages.map((page, index) => {
           const local = Math.min(1, Math.max(0, progress * PANEL_COUNT - index));
-          return <article className={styles.craftsmanBoard} data-media="editorial" data-panel-index={index + 1} style={{ '--stack-index': index, transform: `translate3d(0, ${(1 - local) * entryDistance}px, 0)` } as React.CSSProperties} aria-label={page.alt} key={page.name}>
+          return <article className={styles.craftsmanBoard} data-media="editorial" data-panel-index={index + 1} data-carousel-position={carousel.getPosition(index + 1)} style={{ '--stack-index': index, transform: `translate3d(0, ${(1 - local) * entryDistance}px, 0)` } as React.CSSProperties} aria-label={page.alt} key={page.name}>
             <BrowserBar />
             <div className={styles.craftsmanEditorialLayout}>
               <div className={`${styles.craftsmanEditorialImage} ${styles.lightStudioPage}`}><LightImage name={page.name} alt={page.alt} /></div>
@@ -180,6 +188,7 @@ export default function LightStudioPractice() {
             </div>
           </article>;
         })}
+        <MobileCardCarouselControls label="Light Studio" onPrevious={() => carousel.select(carousel.index - 1)} onNext={() => carousel.select(carousel.index + 1)} />
       </div>
       </div>
     </div>

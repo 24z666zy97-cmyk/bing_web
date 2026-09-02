@@ -25,6 +25,8 @@ const INTRO_DIRECTIONS = [
 const DEFAULT_DIR = 'right-ahead';
 const INTRO_TRIGGER_PROGRESS = 0.1;
 const POINTER_FOLLOW_DELAY_MS = 300;
+const MOBILE_TAP_MAX_MOVE_PX = 12;
+const MOBILE_GAZE_HOLD_MS = 800;
 const EASTER_EGG_DIR = 'cross-eyed';
 const CROSS_EYED_RADIUS = 0.12;
 
@@ -45,10 +47,9 @@ const DIRECTIONS: readonly Direction[] = [
   EASTER_EGG_DIR,
 ];
 
-interface EyeFrame {
-  dir: Direction;
-  revision: number;
-}
+const ALL_DIRECTIONS: readonly Direction[] = Array.from(
+  new Set<Direction>([...PREPARE_DIRECTIONS, ...DIRECTIONS]),
+);
 
 interface EyesProps {
   progress: number;
@@ -56,27 +57,17 @@ interface EyesProps {
 }
 
 export default function Eyes({ progress, onPrepared }: EyesProps) {
-  const [frames, setFrames] = useState<[EyeFrame, EyeFrame]>([
-    { dir: DEFAULT_DIR, revision: 0 },
-    { dir: DEFAULT_DIR, revision: -1 },
-  ]);
-  const [activeFrame, setActiveFrame] = useState<0 | 1>(0);
+  const [activeDir, setActiveDir] = useState<Direction>(DEFAULT_DIR);
   const hostRef = useRef<HTMLDivElement>(null);
-  const activeFrameRef = useRef<0 | 1>(0);
-  const displayedDirRef = useRef<Direction>(DEFAULT_DIR);
-  const requestedDirRef = useRef<Direction>(DEFAULT_DIR);
-  const revisionRef = useRef(0);
 
   useEffect(() => {
     let cancelled = false;
-    const preloaders: HTMLImageElement[] = [];
 
     const decodeDirection = async (dir: Direction) => {
       for (const extension of ['avif', 'webp'] as const) {
         const image = new Image();
         image.decoding = 'async';
         image.src = `/profile/avatar/eye-${dir}.${extension}`;
-        preloaders.push(image);
         try {
           await image.decode();
           return;
@@ -87,14 +78,13 @@ export default function Eyes({ progress, onPrepared }: EyesProps) {
       throw new Error(`Unable to decode eye direction: ${dir}`);
     };
 
-    void Promise.all(PREPARE_DIRECTIONS.map(decodeDirection))
+    // Decode every desktop-follow and intro frame before the portrait is marked
+    // ready. This keeps the currently painted eye visible until any requested
+    // direction can be swapped in immediately, including on a cold cache.
+    void Promise.all(ALL_DIRECTIONS.map(decodeDirection))
       .then(() => {
         if (cancelled) return;
         onPrepared();
-
-        const preparedSet = new Set<Direction>(PREPARE_DIRECTIONS);
-        const remaining = DIRECTIONS.filter((dir) => !preparedSet.has(dir));
-        void Promise.allSettled(remaining.map(decodeDirection));
       })
       .catch((error) => {
         if (!cancelled) console.warn('[hero] Eye intro preload failed.', error);
@@ -102,54 +92,12 @@ export default function Eyes({ progress, onPrepared }: EyesProps) {
 
     return () => {
       cancelled = true;
-      preloaders.forEach((image) => {
-        image.src = '';
-      });
     };
   }, [onPrepared]);
 
   const requestDirection = useCallback((dir: Direction) => {
-    if (dir === requestedDirRef.current) return;
-    requestedDirRef.current = dir;
-
-    if (dir === displayedDirRef.current) {
-      revisionRef.current += 1;
-      return;
-    }
-
-    const nextFrame = activeFrameRef.current === 0 ? 1 : 0;
-    const revision = ++revisionRef.current;
-    setFrames((current) => {
-      const updated: [EyeFrame, EyeFrame] = [...current];
-      updated[nextFrame] = { dir, revision };
-      return updated;
-    });
+    setActiveDir((current) => current === dir ? current : dir);
   }, []);
-
-  const showLoadedFrame = useCallback(
-    (frameIndex: 0 | 1, frame: EyeFrame) => {
-      if (
-        frame.dir !== requestedDirRef.current ||
-        frame.revision !== revisionRef.current
-      ) {
-        return;
-      }
-
-      // Let the decoded image reach a paint before hiding the previous frame.
-      requestAnimationFrame(() => {
-        if (
-          frame.dir !== requestedDirRef.current ||
-          frame.revision !== revisionRef.current
-        ) {
-          return;
-        }
-        activeFrameRef.current = frameIndex;
-        displayedDirRef.current = frame.dir;
-        setActiveFrame(frameIndex);
-      });
-    },
-    [],
-  );
 
   useEffect(() => {
     if (progress >= 1) {
@@ -174,31 +122,97 @@ export default function Eyes({ progress, onPrepared }: EyesProps) {
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
     let frame = 0;
+    let returnTimer = 0;
+
+    const requestDirectionForPoint = (clientX: number, clientY: number) => {
+      const host = hostRef.current;
+      if (!host) return;
+
+      const rect = host.getBoundingClientRect();
+      if (!rect.width || !rect.height) return;
+
+      const cx = rect.left + rect.width / 2;
+      const cy = rect.top + rect.height / 2;
+      const dx = clientX - cx;
+      const dy = clientY - cy;
+
+      if (Math.hypot(dx, dy) < rect.width * CROSS_EYED_RADIUS) {
+        requestDirection(EASTER_EGG_DIR);
+        return;
+      }
+
+      const angle = Math.atan2(dy, dx);
+      const turns = (angle / (Math.PI * 2) + 1) % 1;
+      const sector = Math.round(turns * 8) % 8;
+      requestDirection(SECTORS[sector]);
+    };
+
+    const usesTouchInteraction = window.matchMedia(
+      '(hover: none), (pointer: coarse)',
+    ).matches;
+
+    if (usesTouchInteraction) {
+      const interactionSurface = hostRef.current?.parentElement;
+      if (!interactionSurface) return;
+
+      let tapStart: { pointerId: number; x: number; y: number } | null = null;
+
+      const onPointerDown = (event: PointerEvent) => {
+        if (!event.isPrimary) return;
+        tapStart = {
+          pointerId: event.pointerId,
+          x: event.clientX,
+          y: event.clientY,
+        };
+      };
+
+      const onPointerUp = (event: PointerEvent) => {
+        if (!tapStart || tapStart.pointerId !== event.pointerId) return;
+
+        const distance = Math.hypot(
+          event.clientX - tapStart.x,
+          event.clientY - tapStart.y,
+        );
+        tapStart = null;
+        if (distance > MOBILE_TAP_MAX_MOVE_PX) return;
+
+        requestDirectionForPoint(event.clientX, event.clientY);
+        window.clearTimeout(returnTimer);
+        returnTimer = window.setTimeout(() => {
+          requestDirection(DEFAULT_DIR);
+        }, MOBILE_GAZE_HOLD_MS);
+      };
+
+      const onPointerCancel = () => {
+        tapStart = null;
+      };
+
+      interactionSurface.addEventListener('pointerdown', onPointerDown, {
+        passive: true,
+        capture: true,
+      });
+      interactionSurface.addEventListener('pointerup', onPointerUp, {
+        passive: true,
+        capture: true,
+      });
+      interactionSurface.addEventListener('pointercancel', onPointerCancel, {
+        passive: true,
+        capture: true,
+      });
+
+      return () => {
+        window.clearTimeout(returnTimer);
+        interactionSurface.removeEventListener('pointerdown', onPointerDown, true);
+        interactionSurface.removeEventListener('pointerup', onPointerUp, true);
+        interactionSurface.removeEventListener('pointercancel', onPointerCancel, true);
+      };
+    }
 
     const onMove = (event: PointerEvent) => {
       if (frame) return;
       frame = requestAnimationFrame(() => {
         frame = 0;
-        const host = hostRef.current;
-        if (!host) return;
-
-        const rect = host.getBoundingClientRect();
-        if (!rect.width || !rect.height) return;
-
-        const cx = rect.left + rect.width / 2;
-        const cy = rect.top + rect.height / 2;
-        const dx = event.clientX - cx;
-        const dy = event.clientY - cy;
-
-        if (Math.hypot(dx, dy) < rect.width * CROSS_EYED_RADIUS) {
-          requestDirection(EASTER_EGG_DIR);
-          return;
-        }
-
-        const angle = Math.atan2(dy, dx);
-        const turns = (angle / (Math.PI * 2) + 1) % 1;
-        const sector = Math.round(turns * 8) % 8;
-        requestDirection(SECTORS[sector]);
+        requestDirectionForPoint(event.clientX, event.clientY);
       });
     };
 
@@ -215,26 +229,25 @@ export default function Eyes({ progress, onPrepared }: EyesProps) {
 
   return (
     <div ref={hostRef} className={styles.eyes} aria-hidden="true">
-      {frames.map((frame, index) => (
+      {ALL_DIRECTIONS.map((dir) => (
         <picture
           className={styles.frame}
-          data-active={activeFrame === index}
-          key={`${index}-${frame.dir}-${frame.revision}`}
+          data-active={activeDir === dir}
+          key={dir}
         >
           <source
             type="image/avif"
-            srcSet={`/profile/avatar/eye-${frame.dir}.avif`}
+            srcSet={`/profile/avatar/eye-${dir}.avif`}
           />
           <img
-            src={`/profile/avatar/eye-${frame.dir}.webp`}
+            src={`/profile/avatar/eye-${dir}.webp`}
             alt=""
             width={1068}
             height={1213}
             loading="eager"
-            fetchPriority={frame.dir === DEFAULT_DIR ? 'high' : 'auto'}
+            fetchPriority={dir === DEFAULT_DIR ? 'high' : 'auto'}
             decoding="async"
             className={styles.slice}
-            onLoad={() => showLoadedFrame(index as 0 | 1, frame)}
           />
         </picture>
       ))}

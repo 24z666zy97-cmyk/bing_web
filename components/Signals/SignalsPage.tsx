@@ -71,7 +71,7 @@ export default function SignalsPageContent() {
           <GlassesScene className={`${systemStyles.heroCanvas} ${styles.heroCanvas}`} />
         </div>
         <a className={systemStyles.scrollCue} href="#from-content-to-expression">
-          <span className={systemStyles.scrollCueLabel}>我如何转译和传播信息</span>
+          <span className={systemStyles.scrollCueLabel}>我如何转译和传播多元信息</span>
           <span className={systemStyles.scrollIcon} aria-hidden="true">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6" /></svg>
           </span>

@@ -46,6 +46,9 @@ export default function Typewriter({ text, highlight }: TypewriterProps) {
 
   const done = count >= text.length;
   const lines = text.split(/\\n|\r?\n/);
+  const mobileText = text.replace(/\\n|\r?\n/g, '');
+  const mobileVisibleCount = text.slice(0, count).replace(/\\n|\r?\n/g, '').length;
+  const mobileHighlightStart = highlight ? mobileText.indexOf(highlight) : -1;
 
   // 每行在整段文字里的起始下标（含换行符占位），用来换算每行已输入多少字
   const lineStart: number[] = [];
@@ -85,19 +88,53 @@ export default function Typewriter({ text, highlight }: TypewriterProps) {
   };
 
   return (
-    <span ref={hostRef} aria-hidden="true">
-      {lines.map((line, i) => (
-        <Fragment key={i}>
-          {i > 0 && <br />}
-          <span className={styles.chapterChineseTrack}>
-            <span className={styles.chapterChineseGhost}>{line}</span>
-            <span className={styles.chapterChineseText}>
-              {renderLine(line.slice(0, typedLengths[i]))}
-              {i === activeLine && <span className={styles.typeCursor} />}
+    <span ref={hostRef} className={styles.typewriterHost} aria-hidden="true">
+      <span className={styles.typewriterDesktop}>
+        {lines.map((line, i) => (
+          <Fragment key={i}>
+            {i > 0 && <br />}
+            <span className={styles.chapterChineseTrack}>
+              <span className={styles.chapterChineseGhost}>{line}</span>
+              <span className={styles.chapterChineseText}>
+                {renderLine(line.slice(0, typedLengths[i]))}
+                {i === activeLine && <span className={styles.typeCursor} />}
+              </span>
             </span>
+          </Fragment>
+        ))}
+      </span>
+
+      <span className={styles.typewriterMobile}>
+        <span className={styles.chapterChineseTrack}>
+          <span className={styles.chapterChineseGhost}>{mobileText}</span>
+          <span className={styles.chapterChineseText}>
+            {mobileVisibleCount === 0 && <span className={styles.typeCursor} />}
+            {Array.from(mobileText).map((char, index) => {
+              const highlighted =
+                mobileHighlightStart >= 0 &&
+                index >= mobileHighlightStart &&
+                index < mobileHighlightStart + (highlight?.length ?? 0);
+              const charClass = highlighted
+                ? done
+                  ? `${styles.typewriterMobileChar} ${styles.typewriterHighlight} ${styles.typewriterHighlightOn}`
+                  : `${styles.typewriterMobileChar} ${styles.typewriterHighlight}`
+                : styles.typewriterMobileChar;
+
+              return (
+                <Fragment key={`${char}-${index}`}>
+                  <span
+                    className={charClass}
+                    data-visible={index < mobileVisibleCount ? 'true' : undefined}
+                  >
+                    {char}
+                  </span>
+                  {index + 1 === mobileVisibleCount && <span className={styles.typeCursor} />}
+                </Fragment>
+              );
+            })}
           </span>
-        </Fragment>
-      ))}
+        </span>
+      </span>
     </span>
   );
 }

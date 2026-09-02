@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import { MobileCardCarouselControls, useMobileCardCarousel } from '@/components/MobileCardCarousel';
 import WorkflowCapabilitiesCard, { type Capability } from '@/components/System/WorkflowCapabilitiesCard';
 import styles from './ResearchPractice.module.css';
 
@@ -170,6 +171,8 @@ export default function ResearchPractice() {
   const [entered, setEntered] = useState([false, false, false]);
   const [entryDistance, setEntryDistance] = useState(720);
   const [activeTopic, setActiveTopic] = useState(-1);
+  const carousel = useMobileCardCarousel(3, rootRef);
+  const displayedTopic = carousel.enabled ? carousel.index : activeTopic;
 
   useEffect(() => {
     if (window.matchMedia('(max-width: 980px)').matches) {
@@ -194,6 +197,10 @@ export default function ResearchPractice() {
   const scrollToChart = (index: number) => {
     const root = rootRef.current;
     if (!root) return;
+    if (carousel.enabled) {
+      carousel.select(index);
+      return;
+    }
     if (window.matchMedia('(max-width: 980px)').matches) {
       document.getElementById(`research-chart-${index + 1}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
       return;
@@ -213,7 +220,7 @@ export default function ResearchPractice() {
     showMeta={false}
     description={null}
     footerNote="数据已做脱敏处理，仅展示分析框架。"
-    stageContent={activeTopic < 0
+    stageContent={displayedTopic < 0
       ? <div className={styles.overviewStage} key="overview">
           <header>
             <h3 className={styles.overviewTitle}>Organizing Complexity</h3>
@@ -238,16 +245,16 @@ export default function ResearchPractice() {
             ))}
           </div>
         </div>
-      : <div className={styles.topicStage} key={TOPIC_DETAILS[activeTopic].english}>
-          <header><h3><span>{TOPIC_DETAILS[activeTopic].english}</span> {TOPIC_DETAILS[activeTopic].chinese}</h3><button type="button" aria-label={`切换到${TOPIC_DETAILS[(activeTopic + 1) % TOPIC_DETAILS.length].chinese}`} onClick={() => scrollToChart((activeTopic + 1) % TOPIC_DETAILS.length)}><svg viewBox="0 0 20 20" aria-hidden="true"><path d="m8 5 5 5-5 5"/></svg></button></header>
-          <p><CommaBreakText text={TOPIC_DETAILS[activeTopic].description} /></p>
+      : <div className={styles.topicStage} key={TOPIC_DETAILS[displayedTopic].english}>
+          <header><h3><span>{TOPIC_DETAILS[displayedTopic].english}</span> {TOPIC_DETAILS[displayedTopic].chinese}</h3><button type="button" aria-label={`切换到${TOPIC_DETAILS[(displayedTopic + 1) % TOPIC_DETAILS.length].chinese}`} onClick={() => scrollToChart((displayedTopic + 1) % TOPIC_DETAILS.length)}><svg viewBox="0 0 20 20" aria-hidden="true"><path d="m8 5 5 5-5 5"/></svg></button></header>
+          <p><CommaBreakText text={TOPIC_DETAILS[displayedTopic].description} /></p>
           <ul>
-            {TOPIC_DETAILS[activeTopic].criteria.map((criterion) => <li key={criterion.label}><TopicMetricGlyph type={criterion.icon}/><strong>{criterion.label}</strong></li>)}
-            {Array.from({ length: 3 - TOPIC_DETAILS[activeTopic].criteria.length }, (_, index) => <li key={`placeholder-${index}`} data-placeholder="true" aria-hidden="true" />)}
+            {TOPIC_DETAILS[displayedTopic].criteria.map((criterion) => <li key={criterion.label}><TopicMetricGlyph type={criterion.icon}/><strong>{criterion.label}</strong></li>)}
+            {Array.from({ length: 3 - TOPIC_DETAILS[displayedTopic].criteria.length }, (_, index) => <li key={`placeholder-${index}`} data-placeholder="true" aria-hidden="true" />)}
           </ul>
         </div>}
   />;
-  const renderPromptBoard = (extraClass = '') => <article className={`${styles.board} ${styles.promptBoard} ${extraClass}`}><ol>{PROMPTS.map(([title, body], index) => <li key={title}><div><strong>{title}</strong><p>{body}</p></div><button className={styles.arrow} type="button" aria-label={`查看${title}图表`} onClick={() => scrollToChart(index)}><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 3.5v11M6.25 11.25 10 15l3.75-3.75"/></svg></button></li>)}</ol></article>;
+  const renderPromptBoard = () => <article className={`${styles.board} ${styles.promptBoard}`}><ol>{PROMPTS.map(([title, body], index) => <li key={title}><div><strong>{title}</strong><p>{body}</p></div><button className={styles.arrow} type="button" aria-label={`查看${title}图表`} onClick={() => scrollToChart(index)}><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 3.5v11M6.25 11.25 10 15l3.75-3.75"/></svg></button></li>)}</ol></article>;
 
   return <div ref={rootRef} className={styles.scrollStage}>
     <div ref={stickyRef} className={styles.stickyStage}>
@@ -255,9 +262,10 @@ export default function ResearchPractice() {
         {renderFeatureCard(styles.mobilePagerCard)}
       </div>
       {renderFeatureCard(styles.desktopFeatureCard)}
-      <div className={styles.boardStack}>
-        {renderPromptBoard(styles.desktopPromptBoard)}
-        {[<AlmanacChart active={entered[0]} key="almanac"/>, <HubChart active={entered[1]} key="hub"/>, <MismatchChart active={entered[2]} key="mismatch"/>].map((chart, index) => { const local = Math.min(1, Math.max(0, progress * 3 - index)); return <article id={`research-chart-${index + 1}`} className={`${styles.board} ${styles.chartBoard}`} style={{ '--stack-index': index, transform: `translate3d(0, ${(1 - local) * entryDistance}px, 0)` } as React.CSSProperties} key={index}>{chart}</article>; })}
+      <div className={styles.boardStack} data-mobile-carousel={carousel.enabled || undefined} data-carousel-direction={carousel.direction ?? undefined} onPointerDown={carousel.onPointerDown} onPointerUp={carousel.onPointerUp}>
+        {renderPromptBoard()}
+        {[<AlmanacChart active={entered[0]} key="almanac"/>, <HubChart active={entered[1]} key="hub"/>, <MismatchChart active={entered[2]} key="mismatch"/>].map((chart, index) => { const local = Math.min(1, Math.max(0, progress * 3 - index)); return <article id={`research-chart-${index + 1}`} className={`${styles.board} ${styles.chartBoard}`} data-carousel-position={carousel.getPosition(index)} style={{ '--stack-index': index, transform: `translate3d(0, ${(1 - local) * entryDistance}px, 0)` } as React.CSSProperties} key={index}>{chart}</article>; })}
+        <MobileCardCarouselControls label="复杂信息的组织" onPrevious={() => carousel.select(carousel.index - 1)} onNext={() => carousel.select(carousel.index + 1)} />
       </div>
     </div>
   </div>;

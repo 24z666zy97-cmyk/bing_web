@@ -178,7 +178,99 @@
   .craftsmanBoard { --craftsman-outer-radius: 18px; height: auto; }
   .craftsmanBoard { --craftsman-board-inset: 4px; }
   .craftsmanBoard[data-media='editorial'] { --craftsman-editorial-gap: var(--craftsman-board-inset); }
+
+  /* 移动端内容卡只保留说明正文：隐藏蓝色英文标题、标题下划线与
+     白色中文小标题。控制卡不使用此容器，因此仍完整保留。 */
+  .craftsmanEditorialCopy header {
+    display: none;
+  }
+
+  .craftsmanEditorialCopy {
+    justify-content: flex-start;
+    gap: 0;
+  }
+
+  .craftsmanEditorialCopy p {
+    margin: 0;
+  }
+
+  .craftsmanBoardStack[data-mobile-carousel='true'] {
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: minmax(0, auto);
+    gap: 0;
+    overflow: visible;
+    touch-action: pan-y;
+    isolation: isolate;
+  }
+
+  .craftsmanBoardStack[data-mobile-carousel='true'] > .craftsmanBoard {
+    grid-area: 1 / 1;
+    align-self: stretch;
+    width: 100%;
+    min-height: 100%;
+    opacity: 0;
+    pointer-events: none;
+    transition:
+      opacity .34s var(--ease-primary),
+      transform .42s var(--ease-primary);
+    will-change: transform, opacity;
+  }
+
+  .craftsmanBoardStack[data-mobile-carousel='true'] > .craftsmanBoard[data-carousel-position='active'] {
+    z-index: 12;
+    opacity: 1;
+    pointer-events: auto;
+    transform: translate3d(0, 0, 0) scale(1) !important;
+  }
+
+  .craftsmanBoardStack[data-mobile-carousel='true'] > .craftsmanBoard[data-carousel-position='previous'] {
+    z-index: 3;
+    opacity: 0;
+    transform: translate3d(0, 0, 0) scale(1) !important;
+  }
+
+  .craftsmanBoardStack[data-mobile-carousel='true'] > .craftsmanBoard[data-carousel-position='next'] {
+    z-index: 4;
+    opacity: 0;
+    transform: translate3d(0, 0, 0) scale(1) !important;
+  }
+
+  .craftsmanBoardStack[data-mobile-carousel='true'] > .craftsmanBoard[data-carousel-position='hidden'] {
+    z-index: 1;
+    transform: translate3d(0, 0, 0) scale(1) !important;
+  }
+
+  /* 媒体卡会随同组最高卡片拉伸；在浏览器顶栏下方的可用区域内
+     垂直居中图片或视频，避免没有说明文字时贴在卡片顶部。 */
+  .craftsmanBoardStack[data-mobile-carousel='true'] > .craftsmanBoard[data-media='wide'] .craftsmanVideoFrame,
+  .craftsmanBoardStack[data-mobile-carousel='true'] > .craftsmanBoard[data-media='wide'] .craftsmanOverviewFrame {
+    align-self: center;
+    margin-top: var(--craftsman-topbar-height);
+  }
+
+  .craftsmanBoardStack[data-carousel-direction='next'] > .craftsmanBoard[data-carousel-position='active'] {
+    animation: mobile-card-enter-right .42s var(--ease-primary) both;
+  }
+
+  .craftsmanBoardStack[data-carousel-direction='next'] > .craftsmanBoard[data-carousel-position='previous'] {
+    animation: mobile-card-exit-left .42s var(--ease-primary) both;
+  }
+
+  .craftsmanBoardStack[data-carousel-direction='previous'] > .craftsmanBoard[data-carousel-position='active'] {
+    animation: mobile-card-enter-left .42s var(--ease-primary) both;
+  }
+
+  .craftsmanBoardStack[data-carousel-direction='previous'] > .craftsmanBoard[data-carousel-position='next'] {
+    animation: mobile-card-exit-right .42s var(--ease-primary) both;
+  }
 }
+
+@keyframes mobile-card-enter-right { from { opacity: 0; translate: 7% 0; } to { opacity: 1; translate: 0 0; } }
+@keyframes mobile-card-exit-left { from { opacity: 1; translate: 0 0; } to { opacity: 0; translate: -5% 0; } }
+@keyframes mobile-card-enter-left { from { opacity: 0; translate: -7% 0; } to { opacity: 1; translate: 0 0; } }
+@keyframes mobile-card-exit-right { from { opacity: 1; translate: 0 0; } to { opacity: 0; translate: 5% 0; } }
 
 @media (max-width: 600px) {
   .craftsmanBoard[data-media='editorial'] { aspect-ratio: auto; }

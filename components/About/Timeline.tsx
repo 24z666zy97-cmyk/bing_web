@@ -52,14 +52,14 @@ const ENTRIES: Entry[] = [
   {
     title: 'CBRE 世邦魏理仕',
     summary: '2025.10一2026.02 | 产业地产交易 | 见习分析师',
-    detail: '参与产业地产交易全流程，锻炼市场分析与投资判断能力。',
+    detail: '参与产业地产交易全流程，培养市场分析与投资判断能力。',
     badge: '/profile/timeline-structure/cbre.webp',
     lane: 'internship',
   },
   {
     title: '米料智慧科技有限公司',
     summary: '2026.03一Present | 墨斗云空间智能系列产品 | 产品经理实习生',
-    detail: '参与空间智能产品的规划与迭代，推动产品落地与用户价值。',
+    detail: '参与空间智能产品的规划与迭代，推动产品落地，创造用户价值。',
     badge: '/profile/timeline-structure/miliao-ai.webp',
     lane: 'internship',
   },

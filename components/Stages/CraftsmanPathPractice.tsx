@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import { MobileCardCarouselControls, useMobileCardCarousel } from '@/components/MobileCardCarousel';
 import styles from './StagesPage.module.css';
 
 const PANEL_COUNT = 3;
@@ -77,6 +78,9 @@ export default function CraftsmanPathPractice() {
   const [videoRequested, setVideoRequested] = useState(false);
   const [activePanel, setActivePanel] = useState(0);
   const [mobileLayout, setMobileLayout] = useState(false);
+  const [mediaPlaying, setMediaPlaying] = useState(false);
+  const carousel = useMobileCardCarousel(PANEL_COUNT + 1, rootRef, mediaPlaying);
+  const displayedPanel = carousel.enabled ? carousel.index : activePanel;
 
   useEffect(() => {
     const query = window.matchMedia('(max-width: 1100px)');
@@ -132,8 +136,8 @@ export default function CraftsmanPathPractice() {
   }, [mobileLayout]);
 
   useEffect(() => {
-    if (activePanel !== 0) videoRef.current?.pause();
-  }, [activePanel]);
+    if (displayedPanel !== 0) videoRef.current?.pause();
+  }, [displayedPanel]);
 
   useEffect(() => {
     const root = rootRef.current;
@@ -155,6 +159,10 @@ export default function CraftsmanPathPractice() {
   const selectPanel = (index: number) => {
     const root = rootRef.current;
     if (!root) return;
+    if (carousel.enabled) {
+      carousel.select(index);
+      return;
+    }
     if (mobileLayout) {
       root.querySelector<HTMLElement>(`[data-panel-index="${index}"]`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
       return;
@@ -187,10 +195,10 @@ export default function CraftsmanPathPractice() {
       <aside className={styles.craftsmanFeatureCard} aria-label="左侧内容接口">
         <div className={styles.craftsmanFeatureStage}>
           <ul className={styles.craftsmanContentList}>
-            <ContentItem active={activePanel === 0} chinese="开麦时刻" icon="mic" onSelect={() => selectPanel(0)} />
-            <ContentItem active={activePanel === 1} chinese="活动宣传册" icon="guide" onSelect={() => selectPanel(1)} />
-            <ContentItem active={activePanel === 2} chinese="解密地图" icon="map" onSelect={() => selectPanel(2)} />
-            <ContentItem active={activePanel === 3} chinese="伙伴介绍" icon="team" onSelect={() => selectPanel(3)} />
+            <ContentItem active={displayedPanel === 0} chinese="开麦时刻" icon="mic" onSelect={() => selectPanel(0)} />
+            <ContentItem active={displayedPanel === 1} chinese="活动宣传册" icon="guide" onSelect={() => selectPanel(1)} />
+            <ContentItem active={displayedPanel === 2} chinese="解密地图" icon="map" onSelect={() => selectPanel(2)} />
+            <ContentItem active={displayedPanel === 3} chinese="伙伴介绍" icon="team" onSelect={() => selectPanel(3)} />
           </ul>
         </div>
         <div className={styles.craftsmanFeatureCopy}>
@@ -198,11 +206,11 @@ export default function CraftsmanPathPractice() {
           <p>既然是 Craftsman’s Path，那就别只坐着听——尝试把一次 Pre 变成一场参观体验，邀请所有人一起走进故事。</p>
         </div>
       </aside>
-      <div className={styles.craftsmanBoardStack} aria-label="Craftsman’s Path 项目媒体">
-        <article className={`${styles.craftsmanBoard} ${styles.craftsmanBoardBase}`} data-media="wide" data-panel-index="0" aria-label="Craftsman’s Path 视频">
+      <div className={styles.craftsmanBoardStack} data-mobile-carousel={carousel.enabled || undefined} data-carousel-direction={carousel.direction ?? undefined} onPointerDown={carousel.onPointerDown} onPointerUp={carousel.onPointerUp} aria-label="Craftsman’s Path 项目媒体">
+        <article className={`${styles.craftsmanBoard} ${styles.craftsmanBoardBase}`} data-media="wide" data-panel-index="0" data-carousel-position={carousel.getPosition(0)} aria-label="Craftsman’s Path 视频">
           <BrowserBar />
           <div className={styles.craftsmanVideoFrame}>
-            {videoRequested ? <video ref={videoRef} src={`${MEDIA_ROOT}/craftsman-path.mp4`} controls playsInline preload="metadata" /> : <button className={styles.craftsmanVideoPoster} type="button" onClick={requestVideo} aria-label="播放 Craftsman’s Path 视频">
+            {videoRequested ? <video ref={videoRef} src={`${MEDIA_ROOT}/craftsman-path.mp4`} controls playsInline preload="metadata" onPlay={() => setMediaPlaying(true)} onPause={() => setMediaPlaying(false)} onEnded={() => setMediaPlaying(false)} /> : <button className={styles.craftsmanVideoPoster} type="button" onClick={requestVideo} aria-label="播放 Craftsman’s Path 视频">
               <img className={styles.craftsmanVideoPosterImage} src={`${MEDIA_ROOT}/video-poster.webp`} alt="" loading="lazy" decoding="async" />
               <span className={styles.craftsmanPlayButton}><PlayIcon /></span>
             </button>}
@@ -210,8 +218,9 @@ export default function CraftsmanPathPractice() {
         </article>
         {Array.from({ length: PANEL_COUNT }, (_, index) => {
           const local = Math.min(1, Math.max(0, progress * PANEL_COUNT - index));
-          return <article className={styles.craftsmanBoard} data-media={index === 0 ? 'wide' : 'editorial'} data-panel-index={index + 1} style={{ '--stack-index': index, transform: `translate3d(0, ${(1 - local) * entryDistance}px, 0)` } as React.CSSProperties} aria-label={`Craftsman’s Path 项目画面 ${index + 1}`} key={index}><BrowserBar />{panels[index]}</article>;
+          return <article className={styles.craftsmanBoard} data-media={index === 0 ? 'wide' : 'editorial'} data-panel-index={index + 1} data-carousel-position={carousel.getPosition(index + 1)} style={{ '--stack-index': index, transform: `translate3d(0, ${(1 - local) * entryDistance}px, 0)` } as React.CSSProperties} aria-label={`Craftsman’s Path 项目画面 ${index + 1}`} key={index}><BrowserBar />{panels[index]}</article>;
         })}
+        <MobileCardCarouselControls label="Craftsman’s Path" onPrevious={() => carousel.select(carousel.index - 1)} onNext={() => carousel.select(carousel.index + 1)} />
       </div>
     </div>
   </div>;

@@ -427,6 +427,7 @@
   }
 
   .overlay {
+    align-content: center;
     padding-block: 6rem 6rem;
   }
 

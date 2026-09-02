@@ -186,7 +186,7 @@ export default function ProductEcosystem() {
   const [isFullView, setIsFullView] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const stageRef = useRef<HTMLElement>(null);
-  const cameraDragRef = useRef({ pointerId: -1, startX: 0, startY: 0, offsetX: 0, offsetY: 0 });
+  const cameraDragRef = useRef({ pointerId: -1, startX: 0, startY: 0, offsetX: 0, offsetY: 0, minX: 0, maxX: 0, minY: 0, maxY: 0 });
   const cameraReturnTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const animationFrameRef = useRef<number | null>(null);
   const stepRef = useRef(0);
@@ -223,13 +223,34 @@ export default function ProductEcosystem() {
     const stage = stageRef.current;
     if (!stage) return;
     if (cameraReturnTimerRef.current) clearTimeout(cameraReturnTimerRef.current);
+    const offsetX = Number.parseFloat(stage.style.getPropertyValue('--camera-drag-x')) || 0;
+    const offsetY = Number.parseFloat(stage.style.getPropertyValue('--camera-drag-y')) || 0;
+    const viewportRect = event.currentTarget.getBoundingClientRect();
+    const stageRect = stage.getBoundingClientRect();
+    const baseLeft = stageRect.left - viewportRect.left - offsetX;
+    const baseTop = stageRect.top - viewportRect.top - offsetY;
+    const horizontalTravel = viewportRect.width - stageRect.width;
+    const verticalTravel = viewportRect.height - stageRect.height;
+    const minVisualLeft = Math.min(0, horizontalTravel);
+    const maxVisualLeft = Math.max(0, horizontalTravel);
+    const minVisualTop = Math.min(0, verticalTravel);
+    const maxVisualTop = Math.max(0, verticalTravel);
     cameraDragRef.current = {
       pointerId: event.pointerId,
       startX: event.clientX,
       startY: event.clientY,
-      offsetX: Number.parseFloat(stage.style.getPropertyValue('--camera-drag-x')) || 0,
-      offsetY: Number.parseFloat(stage.style.getPropertyValue('--camera-drag-y')) || 0,
+      offsetX,
+      offsetY,
+      minX: minVisualLeft - baseLeft,
+      maxX: maxVisualLeft - baseLeft,
+      minY: minVisualTop - baseTop,
+      maxY: maxVisualTop - baseTop,
     };
+    if (playingRef.current) {
+      playingRef.current = false;
+      pausedAtRef.current = performance.now();
+      setIsPlaying(false);
+    }
     stage.dataset.dragging = 'true';
     event.currentTarget.setPointerCapture(event.pointerId);
   }, [isFullView, isMobile]);
@@ -240,8 +261,8 @@ export default function ProductEcosystem() {
     const stage = stageRef.current;
     if (!stage) return;
     event.preventDefault();
-    const x = Math.max(-180, Math.min(180, drag.offsetX + event.clientX - drag.startX));
-    const y = Math.max(-180, Math.min(180, drag.offsetY + event.clientY - drag.startY));
+    const x = Math.max(drag.minX, Math.min(drag.maxX, drag.offsetX + event.clientX - drag.startX));
+    const y = Math.max(drag.minY, Math.min(drag.maxY, drag.offsetY + event.clientY - drag.startY));
     stage.style.setProperty('--camera-drag-x', `${x}px`);
     stage.style.setProperty('--camera-drag-y', `${y}px`);
   }, []);
@@ -256,6 +277,11 @@ export default function ProductEcosystem() {
     cameraReturnTimerRef.current = setTimeout(() => {
       stage.style.setProperty('--camera-drag-x', '0px');
       stage.style.setProperty('--camera-drag-y', '0px');
+      const now = performance.now();
+      stepStartedAtRef.current = now;
+      pausedAtRef.current = 0;
+      playingRef.current = true;
+      setIsPlaying(true);
     }, 2000);
   }, []);
 

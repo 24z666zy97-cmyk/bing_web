@@ -432,8 +432,13 @@ export default function SystemThinking({
             (Number.parseFloat(pillStyle.paddingInlineEnd) || 0) +
             (Number.parseFloat(pillStyle.borderInlineStartWidth) || 0) +
             (Number.parseFloat(pillStyle.borderInlineEndWidth) || 0);
-          const expandedWidth = Math.max(collapsedWidths[index], trackWidth);
-          pill.style.setProperty('--thinking-collapsed-width', `${collapsedWidths[index].toFixed(2)}px`);
+          /* 移动端同组胶囊收起时统一为最长标题宽度，让 2 × 3 / 3 × 2
+             静态网格保持整齐；桌面换行布局仍按各自内容宽度呈现。 */
+          const collapsedWidth = mobileGrid
+            ? Math.min(widest, trackWidth)
+            : collapsedWidths[index];
+          const expandedWidth = Math.max(collapsedWidth, trackWidth);
+          pill.style.setProperty('--thinking-collapsed-width', `${collapsedWidth.toFixed(2)}px`);
           pill.style.setProperty('--thinking-expanded-width', `${expandedWidth.toFixed(2)}px`);
           pill.style.setProperty(
             '--thinking-reveal-width',

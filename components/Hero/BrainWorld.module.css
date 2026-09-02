@@ -191,6 +191,10 @@
 }
 
 @media (max-width: 768px) {
+  .floating .interactive .waveLayer {
+    animation: none;
+  }
+
   .floating .touchDismiss {
     pointer-events: auto;
   }

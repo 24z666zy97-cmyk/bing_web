@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import { MobileCardCarouselControls, useMobileCardCarousel } from '@/components/MobileCardCarousel';
 import { BrowserBar, ContentItem, PlayIcon } from './CraftsmanPathPractice';
 import styles from './StagesPage.module.css';
 
@@ -29,6 +30,9 @@ export default function HabitatPractice() {
   const [mobileLayout, setMobileLayout] = useState(false);
   const [reduceMotion, setReduceMotion] = useState(false);
   const [stageVisible, setStageVisible] = useState(false);
+  const [mediaPlaying, setMediaPlaying] = useState(false);
+  const carousel = useMobileCardCarousel(PANEL_COUNT + 1, rootRef, mediaPlaying);
+  const displayedPanel = carousel.enabled ? carousel.index : activePanel;
 
   useEffect(() => {
     const mobileQuery = window.matchMedia('(max-width: 1100px)');
@@ -107,15 +111,15 @@ export default function HabitatPractice() {
   }, [mobileLayout]);
 
   useEffect(() => {
-    if (activePanel !== 0 || !stageVisible) videoRef.current?.pause();
-  }, [activePanel, stageVisible]);
+    if (displayedPanel !== 0 || !stageVisible) videoRef.current?.pause();
+  }, [displayedPanel, stageVisible]);
 
   useEffect(() => {
     const motion = motionRef.current;
     if (!motion) return;
-    if (activePanel === 2 && stageVisible && !reduceMotion) motion.play().catch(() => undefined);
+    if (displayedPanel === 2 && stageVisible && !reduceMotion) motion.play().catch(() => undefined);
     else motion.pause();
-  }, [activePanel, reduceMotion, stageVisible]);
+  }, [displayedPanel, reduceMotion, stageVisible]);
 
   const requestVideo = () => {
     setVideoRequested(true);
@@ -125,6 +129,10 @@ export default function HabitatPractice() {
   const selectPanel = (index: number) => {
     const root = rootRef.current;
     if (!root) return;
+    if (carousel.enabled) {
+      carousel.select(index);
+      return;
+    }
     if (mobileLayout) {
       root.querySelector<HTMLElement>(`[data-panel-index="${index}"]`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
       return;
@@ -146,9 +154,9 @@ export default function HabitatPractice() {
       <aside className={styles.craftsmanFeatureCard} aria-label="Habitat 0 内容接口">
         <div className={styles.craftsmanFeatureStage}>
           <ul className={styles.craftsmanContentList}>
-            <ContentItem active={activePanel === 0} chinese="生活预演" icon="preview" onSelect={() => selectPanel(0)} />
-            <ContentItem active={activePanel === 1} chinese="使用路径" icon="route" onSelect={() => selectPanel(1)} />
-            <ContentItem active={activePanel === 2} chinese="系统展开" icon="expand" onSelect={() => selectPanel(2)} />
+            <ContentItem active={displayedPanel === 0} chinese="生活预演" icon="preview" onSelect={() => selectPanel(0)} />
+            <ContentItem active={displayedPanel === 1} chinese="使用路径" icon="route" onSelect={() => selectPanel(1)} />
+            <ContentItem active={displayedPanel === 2} chinese="系统展开" icon="expand" onSelect={() => selectPanel(2)} />
           </ul>
         </div>
         <div className={styles.craftsmanFeatureCopy}>
@@ -156,12 +164,12 @@ export default function HabitatPractice() {
           <p>从预约到体验，从单一使用路径逐步展开至完整系统——让机制、服务和空间在使用体验中被一点点看见。</p>
         </div>
       </aside>
-      <div className={styles.craftsmanBoardStack} aria-label="Habitat 0 项目媒体">
-        <article className={`${styles.craftsmanBoard} ${styles.craftsmanBoardBase}`} data-media="wide" data-panel-index="0" aria-label="Habitat 0 视频">
+      <div className={styles.craftsmanBoardStack} data-mobile-carousel={carousel.enabled || undefined} data-carousel-direction={carousel.direction ?? undefined} onPointerDown={carousel.onPointerDown} onPointerUp={carousel.onPointerUp} aria-label="Habitat 0 项目媒体">
+        <article className={`${styles.craftsmanBoard} ${styles.craftsmanBoardBase}`} data-media="wide" data-panel-index="0" data-carousel-position={carousel.getPosition(0)} aria-label="Habitat 0 视频">
           <BrowserBar />
           <div className={styles.craftsmanVideoFrame}>
             {videoRequested
-              ? <video ref={videoRef} src={`${MEDIA_ROOT}/habitat-0.mp4`} controls playsInline preload="metadata" />
+              ? <video ref={videoRef} src={`${MEDIA_ROOT}/habitat-0.mp4`} controls playsInline preload="metadata" onPlay={() => setMediaPlaying(true)} onPause={() => setMediaPlaying(false)} onEnded={() => setMediaPlaying(false)} />
               : <button className={styles.craftsmanVideoPoster} type="button" onClick={requestVideo} aria-label="播放 Habitat 0 视频">
                 <img className={styles.craftsmanVideoPosterImage} src={`${MEDIA_ROOT}/video-poster.webp`} alt="" loading="lazy" decoding="async" />
                 <span className={styles.craftsmanPlayButton}><PlayIcon /></span>
@@ -170,11 +178,12 @@ export default function HabitatPractice() {
         </article>
         {panels.map((panel, index) => {
           const local = Math.min(1, Math.max(0, progress * PANEL_COUNT - index));
-          return <article className={styles.craftsmanBoard} data-media="wide" data-panel-index={index + 1} style={{ '--stack-index': index, transform: `translate3d(0, ${(1 - local) * entryDistance}px, 0)` } as React.CSSProperties} aria-label={`Habitat 0 项目画面 ${index + 1}`} key={index}>
+          return <article className={styles.craftsmanBoard} data-media="wide" data-panel-index={index + 1} data-carousel-position={carousel.getPosition(index + 1)} style={{ '--stack-index': index, transform: `translate3d(0, ${(1 - local) * entryDistance}px, 0)` } as React.CSSProperties} aria-label={`Habitat 0 项目画面 ${index + 1}`} key={index}>
             <BrowserBar />
             {panel}
           </article>;
         })}
+        <MobileCardCarouselControls label="Habitat 0" onPrevious={() => carousel.select(carousel.index - 1)} onNext={() => carousel.select(carousel.index + 1)} />
       </div>
     </div>
   </div>;
