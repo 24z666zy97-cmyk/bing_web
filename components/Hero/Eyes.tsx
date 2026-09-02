@@ -56,48 +56,117 @@ interface EyesProps {
   onPrepared: () => void;
 }
 
-export default function Eyes({ progress, onPrepared }: EyesProps) {
-  const [activeDir, setActiveDir] = useState<Direction>(DEFAULT_DIR);
-  const hostRef = useRef<HTMLDivElement>(null);
+type ReadyFrame = { image: HTMLImageElement; fail: () => void };
+
+function EyeFrame({ dir, active, onReady }: {
+  dir: Direction;
+  active: boolean;
+  onReady: (dir: Direction, frame: ReadyFrame | null) => void;
+}) {
+  const imageRef = useRef<HTMLImageElement>(null);
+  const [fallback, setFallback] = useState(false);
 
   useEffect(() => {
+    const image = imageRef.current;
+    if (!image) return;
     let cancelled = false;
-
-    const decodeDirection = async (dir: Direction) => {
-      for (const extension of ['avif', 'webp'] as const) {
-        const image = new Image();
-        image.decoding = 'async';
-        image.src = `/profile/avatar/eye-${dir}.${extension}`;
-        try {
-          await image.decode();
-          return;
-        } catch {
-          // Try the fallback format.
-        }
-      }
-      throw new Error(`Unable to decode eye direction: ${dir}`);
+    let decoding = false;
+    let failed = false;
+    const fail = () => {
+      if (cancelled || failed) return;
+      failed = true;
+      onReady(dir, null);
+      if (!fallback) setFallback(true);
+      else console.warn(`[hero] Eye image unavailable: ${dir}`);
     };
-
-    // Decode every desktop-follow and intro frame before the portrait is marked
-    // ready. This keeps the currently painted eye visible until any requested
-    // direction can be swapped in immediately, including on a cold cache.
-    void Promise.all(ALL_DIRECTIONS.map(decodeDirection))
-      .then(() => {
-        if (cancelled) return;
-        onPrepared();
-      })
-      .catch((error) => {
-        if (!cancelled) console.warn('[hero] Eye intro preload failed.', error);
-      });
-
+    const decode = async () => {
+      if (cancelled || failed || decoding) return;
+      decoding = true;
+      try {
+        await image.decode();
+        if (!cancelled && !failed && image.naturalWidth > 0) {
+          onReady(dir, { image, fail });
+        }
+      } catch {
+        fail();
+      } finally {
+        decoding = false;
+      }
+    };
+    image.addEventListener('load', decode);
+    image.addEventListener('error', fail);
+    // Covers cached images whose load event fired before the effect attached.
+    if (image.complete) {
+      if (image.naturalWidth > 0) void decode();
+      else fail();
+    }
     return () => {
       cancelled = true;
+      image.removeEventListener('load', decode);
+      image.removeEventListener('error', fail);
+      onReady(dir, null);
     };
-  }, [onPrepared]);
+  }, [dir, fallback, onReady]);
+
+  return (
+    <picture className={styles.frame} data-active={active}>
+      {!fallback && (
+        <source type="image/avif" srcSet={`/profile/avatar/eye-${dir}.avif`} />
+      )}
+      <img
+        key={fallback ? 'webp' : 'preferred'}
+        ref={imageRef}
+        src={`/profile/avatar/eye-${dir}.webp`}
+        alt=""
+        width={1068}
+        height={1213}
+        loading="eager"
+        fetchPriority={dir === DEFAULT_DIR ? 'high' : 'auto'}
+        decoding="async"
+        className={styles.slice}
+      />
+    </picture>
+  );
+}
+
+export default function Eyes({ progress, onPrepared }: EyesProps) {
+  const [activeDir, setActiveDir] = useState<Direction | null>(null);
+  const hostRef = useRef<HTMLDivElement>(null);
+  const readyFrames = useRef(new Map<Direction, ReadyFrame>());
+  const requestedDir = useRef<Direction>(DEFAULT_DIR);
+  const requestVersion = useRef(0);
+  const [prepared, setPrepared] = useState(false);
 
   const requestDirection = useCallback((dir: Direction) => {
-    setActiveDir((current) => current === dir ? current : dir);
+    requestedDir.current = dir;
+    const version = ++requestVersion.current;
+    const frame = readyFrames.current.get(dir);
+    if (!frame) return; // Keep the last successfully displayed direction.
+    // Decode the actual displayed node, not a detached preloader. Recheck on
+    // each request, and never let a slow earlier request override a later one.
+    void frame.image.decode().then(() => {
+      if (version !== requestVersion.current || readyFrames.current.get(dir) !== frame) return;
+      if (frame.image.naturalWidth > 0) setActiveDir(dir);
+    }).catch(frame.fail);
   }, []);
+
+  const markFrameReady = useCallback((dir: Direction, frame: ReadyFrame | null) => {
+    if (!frame) {
+      readyFrames.current.delete(dir);
+      return;
+    }
+    readyFrames.current.set(dir, frame);
+    // A decoded frame can fill the sockets while the preferred one is pending.
+    setActiveDir((current) => current ?? dir);
+    if (requestedDir.current === dir) requestDirection(dir);
+    if (readyFrames.current.size === ALL_DIRECTIONS.length) setPrepared(true);
+  }, [requestDirection]);
+
+  useEffect(() => {
+    if (prepared) onPrepared();
+  }, [prepared, onPrepared]);
+
+  useEffect(() => () => { ++requestVersion.current; }, []);
 
   useEffect(() => {
     if (progress >= 1) {
@@ -230,26 +299,12 @@ export default function Eyes({ progress, onPrepared }: EyesProps) {
   return (
     <div ref={hostRef} className={styles.eyes} aria-hidden="true">
       {ALL_DIRECTIONS.map((dir) => (
-        <picture
-          className={styles.frame}
-          data-active={activeDir === dir}
+        <EyeFrame
           key={dir}
-        >
-          <source
-            type="image/avif"
-            srcSet={`/profile/avatar/eye-${dir}.avif`}
-          />
-          <img
-            src={`/profile/avatar/eye-${dir}.webp`}
-            alt=""
-            width={1068}
-            height={1213}
-            loading="eager"
-            fetchPriority={dir === DEFAULT_DIR ? 'high' : 'auto'}
-            decoding="async"
-            className={styles.slice}
-          />
-        </picture>
+          dir={dir}
+          active={activeDir === dir}
+          onReady={markFrameReady}
+        />
       ))}
     </div>
   );
