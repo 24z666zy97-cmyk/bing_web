@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next';
 import localFont from 'next/font/local';
+import { Analytics } from '@vercel/analytics/next';
 import '@/styles/globals.css';
 
 const archivo = localFont({
@@ -65,7 +66,10 @@ export default function RootLayout({
       lang="zh-CN"
       className={[archivo.variable, anybody.variable, sourceHan.variable].join(' ')}
     >
-      <body>{children}</body>
+      <body>
+        {children}
+        <Analytics />
+      </body>
     </html>
   );
 }
