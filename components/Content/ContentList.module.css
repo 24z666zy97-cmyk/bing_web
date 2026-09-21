@@ -44,7 +44,6 @@
 
 /* hover 行变白色大胶囊。两端为充分圆润的半圆（content.md §7）。
  * 用 :focus-visible 一起，键盘操作也能看到同样的激活态。 */
-.row:hover,
 .row[data-active='true'],
 .row:focus-visible {
   background: var(--color-capsule-bg);
@@ -80,7 +79,6 @@
   transition: color var(--duration-default) var(--ease-primary);
 }
 
-.row:hover .num,
 .row[data-active='true'] .num,
 .row:focus-visible .num {
   color: var(--color-bg);
@@ -105,19 +103,16 @@
   transform: translateY(0.35rem);
 }
 
-.row:hover .titleSlot,
 .row[data-active='true'] .titleSlot,
 .row:focus-visible .titleSlot {
   transform: translateY(0.35rem);
 }
 
-.list:has(.row:first-child:hover),
 .list:has(.row:first-child[data-active='true']),
 .list:has(.row:first-child:focus-visible) {
   border-top-color: transparent;
 }
 
-.row:has(+ .row:hover),
 .row:has(+ .row[data-active='true']),
 .row:has(+ .row:focus-visible) {
   border-bottom-color: transparent;
@@ -148,7 +143,6 @@
 }
 
 /* 激活时标题由白变粉。白胶囊 + 粉标题为项目主人明确选定的方案。 */
-.row:hover .title,
 .row[data-active='true'] .title,
 .row:focus-visible .title {
   color: var(--color-capsule-title);
@@ -181,7 +175,6 @@
   transform: translateY(100%);
 }
 
-.row:hover .tagline,
 .row[data-active='true'] .tagline,
 .row:focus-visible .tagline {
   opacity: 1;
@@ -238,12 +231,45 @@
   transform-origin: center;
 }
 
-.row:hover .assetClip,
 .row[data-active='true'] .assetClip,
 .row:focus-visible .assetClip {
   opacity: 1;
   /* 只露出最有识别度的部分，其余被胶囊压住 */
   transform: translateY(-8%);
+}
+
+/* Hover belongs only to devices with a real fine pointer. Keeping these
+ * selectors out of the touch media path prevents iPad Safari from consuming
+ * the first tap merely to emulate hover; pointerdown still gives immediate
+ * Chinese feedback and that same tap follows the link. */
+@media (hover: hover) and (pointer: fine) {
+  .row:hover {
+    background: var(--color-capsule-bg);
+    border-radius: 999px;
+    border-bottom-color: transparent;
+    z-index: 2;
+  }
+
+  .row:hover .num { color: var(--color-bg); }
+  .row:hover .titleSlot { transform: translateY(0.35rem); }
+  .list:has(.row:first-child:hover) { border-top-color: transparent; }
+  .row:has(+ .row:hover) { border-bottom-color: transparent; }
+
+  .row:hover .title {
+    color: var(--color-capsule-title);
+    opacity: 0;
+    transform: translateY(-100%);
+  }
+
+  .row:hover .tagline {
+    opacity: 1;
+    transform: translateY(-0.35rem);
+  }
+
+  .row:hover .assetClip {
+    opacity: 1;
+    transform: translateY(-8%);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -297,7 +323,6 @@
   }
 
   /* 小屏胶囊改用小圆角，全圆角在窄宽度下会把文字挤变形 */
-  .row:hover,
   .row[data-active='true'],
   .row:focus-visible {
     border-radius: 999px;
